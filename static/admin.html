@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vector Store Admin</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .container {
+            display: flex;
+            gap: 20px;
+        }
+        .left-panel {
+            flex: 1;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .right-panel {
+            flex: 2;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        h1, h2, h3 {
+            color: #333;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px 0;
+        }
+        button.delete {
+            background-color: #f44336;
+        }
+        input, textarea {
+            padding: 8px;
+            margin: 5px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 100%;
+        }
+        .store-item {
+            padding: 10px;
+            margin: 5px 0;
+            border: 1px solid #eee;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .store-item:hover {
+            background-color: #f5f5f5;
+        }
+        .store-item.selected {
+            background-color: #e0f7fa;
+        }
+        .file-item {
+            padding: 8px;
+            margin: 5px 0;
+            border: 1px solid #eee;
+            border-radius: 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .file-item label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .hidden {
+            display: none;
+        }
+        .message {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .success {
+            background-color: #dff0d8;
+            color: #3c763d;
+        }
+        .error {
+            background-color: #f2dede;
+            color: #a94442;
+        }
+        .file-item {
+        padding: 12px;
+        margin: 8px 0;
+        border: 1px solid #eee;
+        border-radius: 4px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .file-details {
+        flex: 1;
+        margin-left: 10px;
+    }
+    
+    .file-name {
+        font-weight: bold;
+        margin-bottom: 4px;
+    }
+    
+    .file-meta {
+        font-size: 0.8em;
+        color: #666;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    
+    .file-status {
+        padding: 2px 6px;
+        border-radius: 3px;
+        font-size: 0.8em;
+    }
+    
+    .status-completed {
+        background-color: #d4edda;
+        color: #155724;
+    }
+    
+    .status-processing {
+        background-color: #fff3cd;
+        color: #856404;
+    }
+    
+    .status-error {
+        background-color: #f8d7da;
+        color: #721c24;
+    }
+    
+    .file-error {
+        color: #721c24;
+        font-size: 0.8em;
+        margin-top: 4px;
+    }
+    
+    .file-meta {
+        font-size: 0.8em;
+        color: #666;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 4px;
+    }
+    .files-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+    }
+    
+    .files-table th {
+        text-align: left;
+        padding: 10px;
+        background-color: #f0f0f0;
+        border-bottom: 2px solid #ddd;
+    }
+    
+    .files-table td {
+        padding: 10px;
+        border-bottom: 1px solid #eee;
+        vertical-align: top;
+    }
+    
+    .file-row {
+        cursor: pointer;
+    }
+    
+    .file-row:hover {
+        background-color: #f5f5f5;
+    }
+    
+    .file-name {
+        font-weight: bold;
+        margin-bottom: 2px;
+    }
+    
+    .file-id {
+        font-size: 0.8em;
+        color: #666;
+    }
+    
+    .file-details-section {
+        margin-top: 20px;
+        padding: 15px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        background-color: #f9f9f9;
+    }
+    
+    .details-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    
+    .details-table td {
+        padding: 6px;
+        border-bottom: 1px solid #eee;
+    }
+    
+    .property-name {
+        font-weight: bold;
+        width: 30%;
+    }
+    
+    .file-status {
+        padding: 3px 8px;
+        border-radius: 3px;
+        font-size: 0.85em;
+    }
+    .close-details {
+        margin-top: 10px;
+        background-color: #6c757d;
+    }
+    </style>
+</head>
+<body>
+    <h1>Vector Store Admin</h1>
+    
+    <div class="container">
+        <div class="left-panel">
+            <h2>Vector Stores</h2>
+            <button id="refreshStores">Refresh List</button>
+            <div id="vectorStoreList"></div>
+            
+            <h3>Create New Vector Store</h3>
+            <input type="text" id="newStoreName" placeholder="Vector Store Name">
+            <textarea id="newStoreDescription" placeholder="Description (optional)"></textarea>
+            <button id="createStore">Create Vector Store</button>
+        </div>
+        
+        <div class="right-panel">
+            <div id="storeDetails" class="hidden">
+                <h2>Store: <span id="selectedStoreName"></span></h2>
+                <p>ID: <span id="selectedStoreId"></span></p>
+                <button id="deleteStore" class="delete">Delete This Vector Store</button>
+                
+                <h3>Files</h3>
+                <button id="refreshFiles">Refresh Files</button>
+                <div id="fileList"></div>
+                
+                <h3>Upload New File</h3>
+                <input type="file" id="fileUpload">
+                <button id="uploadFile">Upload</button>
+                
+                <h3>Delete Selected Files</h3>
+                <button id="deleteFiles" class="delete">Delete Selected Files</button>
+            </div>
+            
+            <div id="noStoreSelected">
+                <p>Select a vector store from the left panel to manage its files.</p>
+            </div>
+        </div>
+    </div>
+    
+    <div id="message" class="message hidden"></div>
+    
+    <script>
+        // Global variables
+        let selectedStoreId = null;
+        let selectedStoreFiles = [];
+        
+        // Helper functions
+        function showMessage(text, isError = false) {
+            const messageEl = document.getElementById('message');
+            messageEl.textContent = text;
+            messageEl.className = isError ? 'message error' : 'message success';
+            messageEl.classList.remove('hidden');
+            
+            // Hide message after 5 seconds
+            setTimeout(() => {
+                messageEl.classList.add('hidden');
+            }, 5000);
+        }
+        
+        // Load vector stores
+        async function loadVectorStores() {
+            try {
+                const response = await fetch('/storage-admin/vector-stores');
+                const data = await response.json();
+                
+                const listEl = document.getElementById('vectorStoreList');
+                listEl.innerHTML = '';
+                
+                if (data.vector_stores && data.vector_stores.length > 0) {
+                    data.vector_stores.forEach(store => {
+                        const div = document.createElement('div');
+                        div.className = 'store-item';
+                        div.dataset.id = store.id;
+                        div.innerHTML = `
+                            <strong>${store.name}</strong>
+                            <div><small>ID: ${store.id}</small></div>
+                        `;
+                        
+                        div.addEventListener('click', () => selectStore(store));
+                        
+                        if (selectedStoreId === store.id) {
+                            div.classList.add('selected');
+                        }
+                        
+                        listEl.appendChild(div);
+                    });
+                } else {
+                    listEl.innerHTML = '<p>No vector stores found.</p>';
+                }
+            } catch (error) {
+                console.error('Error loading vector stores:', error);
+                showMessage('Failed to load vector stores: ' + error.message, true);
+            }
+        }
+        
+        // Select a store
+        function selectStore(store) {
+            selectedStoreId = store.id;
+            document.getElementById('selectedStoreName').textContent = store.name;
+            document.getElementById('selectedStoreId').textContent = store.id;
+            
+            document.getElementById('storeDetails').classList.remove('hidden');
+            document.getElementById('noStoreSelected').classList.add('hidden');
+            
+            // Update selection in the list
+            document.querySelectorAll('.store-item').forEach(item => {
+                item.classList.toggle('selected', item.dataset.id === store.id);
+            });
+            
+            // Load files for this store
+            loadFiles(store.id);
+        }
+        
+        // Load files for a vector store
+        async function loadFiles(storeId) {
+        try {
+            // Show loading indicator
+            const listEl = document.getElementById('fileList');
+            listEl.innerHTML = '<p><i>Loading files...</i></p>';
+            
+            const response = await fetch(`/storage-admin/vector-stores/${storeId}/files`);
+            const data = await response.json();
+            
+            // Debug the response data
+            console.log("File data received:", data);
+            
+            listEl.innerHTML = '';
+            
+            if (data.files && data.files.length > 0) {
+                // Create a table for better formatting
+                const table = document.createElement('table');
+                table.className = 'files-table';
+                
+                // Add table header
+                const thead = document.createElement('thead');
+                thead.innerHTML = `
+                    <tr>
+                        <th style="width: 30px;"></th>
+                        <th>Filename</th>
+                        <th>Created</th>
+                        <th>Size</th>
+                        <th>Status</th>
+                    </tr>
+                `;
+                table.appendChild(thead);
+                
+                // Create table body
+                const tbody = document.createElement('tbody');
+                
+                data.files.forEach(file => {
+                    console.log("Processing file:", file); // Log each file to inspect properties
+                    
+                    const tr = document.createElement('tr');
+                    tr.className = 'file-row';
+                    
+                    // Get filename from multiple possible sources
+                    let filename = 'Unknown filename';
+                    if (file.filename) {
+                        filename = file.filename;
+                    } else if (file.purpose === 'assistants' && file.id) {
+                        // If it's an assistants file, use ID with appropriate prefix
+                        filename = `Assistant File (${file.id})`;
+                    } else if (file.id) {
+                        // Default fallback to ID
+                        // filename = `File (${file.id})`;
+                        filename = file.filename;
+                    }
+                    
+                    // Format the date if available
+                    let dateStr = 'Unknown';
+                    if (file.created_at) {
+                        const date = new Date(file.created_at);
+                        dateStr = date.toLocaleString();
+                    }
+                    
+                    // Determine status class
+                    let statusClass = '';
+                    const status = file.detail_status || file.status || 'Unknown';
+                    if (status === 'completed') statusClass = 'status-completed';
+                    else if (status === 'processing') statusClass = 'status-processing';
+                    else if (status === 'error') statusClass = 'status-error';
+                    
+                    // Format file size if available
+                    let sizeStr = 'Unknown';
+                    if (file.bytes) {
+                        sizeStr = formatFileSize(file.bytes);
+                    }
+                    
+                    // Create row content
+                    tr.innerHTML = `
+                        <td>
+                            <input type="checkbox" class="file-checkbox" data-id="${file.id}">
+                        </td>
+                        <td>
+                            <div class="file-name">${filename}</div>
+                            <div class="file-id">ID: ${file.id}</div>
+                        </td>
+                        <td>${dateStr}</td>
+                        <td>${sizeStr}</td>
+                        <td>
+                            <span class="file-status ${statusClass}">${status}</span>
+                        </td>
+                    `;
+                    
+                    tbody.appendChild(tr);
+                });
+                
+                table.appendChild(tbody);
+                listEl.appendChild(table);
+                
+                // Add expanded details section
+                const detailsSection = document.createElement('div');
+                detailsSection.id = 'file-details-section';
+                detailsSection.className = 'file-details-section hidden';
+                listEl.appendChild(detailsSection);
+                
+                // Add click handler to rows to show details
+                document.querySelectorAll('.file-row').forEach(row => {
+                    row.addEventListener('click', (e) => {
+                        // Don't trigger when clicking the checkbox
+                        if (e.target.type !== 'checkbox') {
+                            const fileId = row.querySelector('.file-checkbox').dataset.id;
+                            showFileDetails(fileId, data.files);
+                        }
+                    });
+                });
+            } else {
+                listEl.innerHTML = '<p>No files found in this vector store.</p>';
+            }
+            
+            selectedStoreFiles = data.files || [];
+        } catch (error) {
+            console.error('Error loading files:', error);
+            document.getElementById('fileList').innerHTML = 
+                `<p class="error">Failed to load files: ${error.message}</p>`;
+            showMessage('Failed to load files: ' + error.message, true);
+        }
+    }
+    
+    // Function to show detailed file information
+    function showFileDetails(fileId, files) {
+        const file = files.find(f => f.id === fileId);
+        if (!file) return;
+        
+        const detailsEl = document.getElementById('file-details-section');
+        detailsEl.classList.remove('hidden');
+        
+        // Format all available properties
+        const properties = [];
+        for (const [key, value] of Object.entries(file)) {
+            if (value !== null && value !== undefined) {
+                // Format date properties
+                let displayValue = value;
+                if (key.includes('created_at') || key.includes('updated_at')) {
+                    try {
+                        displayValue = new Date(value).toLocaleString();
+                    } catch (e) {
+                        // Keep original value if date conversion fails
+                    }
+                }
+                
+                properties.push(`<tr>
+                    <td class="property-name">${key}</td>
+                    <td class="property-value">${displayValue}</td>
+                </tr>`);
+            }
+        }
+        
+        // Get filename from multiple possible sources
+        let filename = 'Unknown filename';
+        if (file.filename) {
+            filename = file.filename;
+        } else if (file.purpose === 'assistants' && file.id) {
+            filename = `Assistant File (${file.id})`;
+        } else if (file.id) {
+            filename = `File (${file.id})`;
+        }
+        
+        detailsEl.innerHTML = `
+            <h3>Detailed File Information</h3>
+            <h4>${filename}</h4>
+            <table class="details-table">
+                <tbody>
+                    ${properties.join('')}
+                </tbody>
+            </table>
+            <button onclick="document.getElementById('file-details-section').classList.add('hidden')" class="close-details">Close Details</button>
+        `;
+        
+        detailsEl.scrollIntoView({ behavior: 'smooth' });
+    }
+    
+    // Helper function to format file size
+    function formatFileSize(bytes) {
+        if (!bytes || bytes === 0) return '0 Bytes';
+        
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+        
+        // Create new vector store
+        async function createVectorStore() {
+            const name = document.getElementById('newStoreName').value.trim();
+            const description = document.getElementById('newStoreDescription').value.trim();
+            
+            if (!name) {
+                showMessage('Please enter a name for the vector store', true);
+                return;
+            }
+            
+            try {
+                const response = await fetch('/storage-admin/vector-stores', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        name,
+                        description: description || undefined
+                    })
+                });
+                
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.detail || 'Failed to create vector store');
+                }
+                
+                const result = await response.json();
+                showMessage(`Vector store "${name}" created successfully!`);
+                
+                // Clear input fields
+                document.getElementById('newStoreName').value = '';
+                document.getElementById('newStoreDescription').value = '';
+                
+                // Refresh the list
+                await loadVectorStores();
+                
+                // Select the newly created store
+                selectStore(result);
+            } catch (error) {
+                console.error('Error creating vector store:', error);
+                showMessage('Failed to create vector store: ' + error.message, true);
+            }
+        }
+        
+        // Delete vector store
+        async function deleteVectorStore() {
+            if (!selectedStoreId) {
+                showMessage('No vector store selected', true);
+                return;
+            }
+            
+            if (!confirm('Are you sure you want to delete this vector store? This action cannot be undone.')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/storage-admin/vector-stores/${selectedStoreId}`, {
+                    method: 'DELETE'
+                });
+                
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.detail || 'Failed to delete vector store');
+                }
+                
+                showMessage('Vector store deleted successfully!');
+                
+                // Reset selection
+                selectedStoreId = null;
+                document.getElementById('storeDetails').classList.add('hidden');
+                document.getElementById('noStoreSelected').classList.remove('hidden');
+                
+                // Refresh the list
+                await loadVectorStores();
+            } catch (error) {
+                console.error('Error deleting vector store:', error);
+                showMessage('Failed to delete vector store: ' + error.message, true);
+            }
+        }
+        
+        // Upload file to vector store
+        async function uploadFile() {
+            if (!selectedStoreId) {
+                showMessage('No vector store selected', true);
+                return;
+            }
+            
+            const fileInput = document.getElementById('fileUpload');
+            if (!fileInput.files || fileInput.files.length === 0) {
+                showMessage('Please select a file to upload', true);
+                return;
+            }
+            
+            const file = fileInput.files[0];
+            const formData = new FormData();
+            formData.append('file', file);
+            
+            try {
+                const response = await fetch(`/storage-admin/vector-stores/${selectedStoreId}/files`, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.detail || 'Failed to upload file');
+                }
+                
+                showMessage(`File "${file.name}" uploaded successfully!`);
+                
+                // Clear file input
+                fileInput.value = '';
+                
+                // Refresh files
+                await loadFiles(selectedStoreId);
+            } catch (error) {
+                console.error('Error uploading file:', error);
+                showMessage('Failed to upload file: ' + error.message, true);
+            }
+        }
+        
+        // Delete selected files
+        async function deleteSelectedFiles() {
+            if (!selectedStoreId) {
+                showMessage('No vector store selected', true);
+                return;
+            }
+            
+            const selectedFileIds = Array.from(document.querySelectorAll('.file-checkbox:checked'))
+                .map(checkbox => checkbox.dataset.id);
+            
+            if (selectedFileIds.length === 0) {
+                showMessage('Please select at least one file to delete', true);
+                return;
+            }
+            
+            if (!confirm(`Are you sure you want to delete ${selectedFileIds.length} file(s)? This action cannot be undone.`)) {
+                return;
+            }
+            
+            try {
+                const response = await fetch('/storage-admin/files', {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        file_ids: selectedFileIds,
+                        vector_store_id: selectedStoreId
+                    })
+                });
+                
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.detail || 'Failed to delete files');
+                }
+                
+                showMessage(`${selectedFileIds.length} file(s) deleted successfully!`);
+                
+                // Refresh files
+                await loadFiles(selectedStoreId);
+            } catch (error) {
+                console.error('Error deleting files:', error);
+                showMessage('Failed to delete files: ' + error.message, true);
+            }
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            // Load initial data
+            loadVectorStores();
+            
+            // Set up event listeners
+            document.getElementById('refreshStores').addEventListener('click', loadVectorStores);
+            document.getElementById('createStore').addEventListener('click', createVectorStore);
+            document.getElementById('deleteStore').addEventListener('click', deleteVectorStore);
+            document.getElementById('refreshFiles').addEventListener('click', () => {
+                if (selectedStoreId) {
+                    loadFiles(selectedStoreId);
+                }
+            });
+            document.getElementById('uploadFile').addEventListener('click', uploadFile);
+            document.getElementById('deleteFiles').addEventListener('click', deleteSelectedFiles);
+        });
+    </script>
+</body>
+</html>
