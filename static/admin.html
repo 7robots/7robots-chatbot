@@ -92,138 +92,101 @@
             background-color: #f2dede;
             color: #a94442;
         }
-        .file-item {
-        padding: 12px;
-        margin: 8px 0;
-        border: 1px solid #eee;
-        border-radius: 4px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-    
-    .file-details {
-        flex: 1;
-        margin-left: 10px;
-    }
-    
-    .file-name {
-        font-weight: bold;
-        margin-bottom: 4px;
-    }
-    
-    .file-meta {
-        font-size: 0.8em;
-        color: #666;
-        display: flex;
-        flex-wrap: wrap;
-        gap: 10px;
-    }
-    
-    .file-status {
-        padding: 2px 6px;
-        border-radius: 3px;
-        font-size: 0.8em;
-    }
-    
-    .status-completed {
-        background-color: #d4edda;
-        color: #155724;
-    }
-    
-    .status-processing {
-        background-color: #fff3cd;
-        color: #856404;
-    }
-    
-    .status-error {
-        background-color: #f8d7da;
-        color: #721c24;
-    }
-    
-    .file-error {
-        color: #721c24;
-        font-size: 0.8em;
-        margin-top: 4px;
-    }
-    
-    .file-meta {
-        font-size: 0.8em;
-        color: #666;
-        display: flex;
-        flex-wrap: wrap;
-        gap: 10px;
-        margin-top: 4px;
-    }
-    .files-table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-bottom: 20px;
-    }
-    
-    .files-table th {
-        text-align: left;
-        padding: 10px;
-        background-color: #f0f0f0;
-        border-bottom: 2px solid #ddd;
-    }
-    
-    .files-table td {
-        padding: 10px;
-        border-bottom: 1px solid #eee;
-        vertical-align: top;
-    }
-    
-    .file-row {
-        cursor: pointer;
-    }
-    
-    .file-row:hover {
-        background-color: #f5f5f5;
-    }
-    
-    .file-name {
-        font-weight: bold;
-        margin-bottom: 2px;
-    }
-    
-    .file-id {
-        font-size: 0.8em;
-        color: #666;
-    }
-    
-    .file-details-section {
-        margin-top: 20px;
-        padding: 15px;
-        border: 1px solid #ddd;
-        border-radius: 5px;
-        background-color: #f9f9f9;
-    }
-    
-    .details-table {
-        width: 100%;
-        border-collapse: collapse;
-    }
-    
-    .details-table td {
-        padding: 6px;
-        border-bottom: 1px solid #eee;
-    }
-    
-    .property-name {
-        font-weight: bold;
-        width: 30%;
-    }
-    
-    .file-status {
-        padding: 3px 8px;
-        border-radius: 3px;
-        font-size: 0.85em;
-    }
-    .close-details {
-        margin-top: 10px;
-        background-color: #6c757d;
-    }
+        .file-details {
+            flex: 1;
+            margin-left: 10px;
+        }
+        .file-name {
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+        .file-meta {
+            font-size: 0.8em;
+            color: #666;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 4px;
+        }
+        .file-status {
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 0.85em;
+        }
+        .status-completed {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .status-processing {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        .status-error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .file-error {
+            color: #721c24;
+            font-size: 0.8em;
+            margin-top: 4px;
+        }
+        .files-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        .files-table th {
+            text-align: left;
+            padding: 10px;
+            background-color: #f0f0f0;
+            border-bottom: 2px solid #ddd;
+        }
+        .files-table td {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            vertical-align: top;
+        }
+        .file-row {
+            cursor: pointer;
+        }
+        .file-row:hover {
+            background-color: #f5f5f5;
+        }
+        .file-id {
+            font-size: 0.8em;
+            color: #666;
+        }
+        .file-details-section {
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        .details-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .details-table td {
+            padding: 6px;
+            border-bottom: 1px solid #eee;
+        }
+        .property-name {
+            font-weight: bold;
+            width: 30%;
+        }
+        .close-details {
+            margin-top: 10px;
+            background-color: #6c757d;
+        }
+        .files-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .file-item:hover {
+            background-color: #f5f5f5;
+        }
     </style>
 </head>
 <body>
@@ -236,7 +199,7 @@
             <div id="vectorStoreList"></div>
             
             <h3>Create New Vector Store</h3>
-            <input type="text" id="newStoreName" placeholder="Vector Store Name">
+            <input type="text" id="newStoreName" placeholder="Name">
             <textarea id="newStoreDescription" placeholder="Description (optional)"></textarea>
             <button id="createStore">Create Vector Store</button>
         </div>
@@ -248,15 +211,15 @@
                 <button id="deleteStore" class="delete">Delete This Vector Store</button>
                 
                 <h3>Files</h3>
-                <button id="refreshFiles">Refresh Files</button>
+                <div class="actions">
+                    <button id="refreshFiles">Refresh Files</button>
+                    <button id="deleteFiles" class="delete">Delete Selected Files</button>
+                </div>
                 <div id="fileList"></div>
                 
                 <h3>Upload New File</h3>
                 <input type="file" id="fileUpload">
                 <button id="uploadFile">Upload</button>
-                
-                <h3>Delete Selected Files</h3>
-                <button id="deleteFiles" class="delete">Delete Selected Files</button>
             </div>
             
             <div id="noStoreSelected">
@@ -338,196 +301,6 @@
             // Load files for this store
             loadFiles(store.id);
         }
-        
-        // Load files for a vector store
-        async function loadFiles(storeId) {
-        try {
-            // Show loading indicator
-            const listEl = document.getElementById('fileList');
-            listEl.innerHTML = '<p><i>Loading files...</i></p>';
-            
-            const response = await fetch(`/storage-admin/vector-stores/${storeId}/files`);
-            const data = await response.json();
-            
-            // Debug the response data
-            console.log("File data received:", data);
-            
-            listEl.innerHTML = '';
-            
-            if (data.files && data.files.length > 0) {
-                // Create a table for better formatting
-                const table = document.createElement('table');
-                table.className = 'files-table';
-                
-                // Add table header
-                const thead = document.createElement('thead');
-                thead.innerHTML = `
-                    <tr>
-                        <th style="width: 30px;"></th>
-                        <th>Filename</th>
-                        <th>Created</th>
-                        <th>Size</th>
-                        <th>Status</th>
-                    </tr>
-                `;
-                table.appendChild(thead);
-                
-                // Create table body
-                const tbody = document.createElement('tbody');
-                
-                data.files.forEach(file => {
-                    console.log("Processing file:", file); // Log each file to inspect properties
-                    
-                    const tr = document.createElement('tr');
-                    tr.className = 'file-row';
-                    
-                    // Get filename from multiple possible sources
-                    let filename = 'Unknown filename';
-                    if (file.filename) {
-                        filename = file.filename;
-                    } else if (file.purpose === 'assistants' && file.id) {
-                        // If it's an assistants file, use ID with appropriate prefix
-                        filename = `Assistant File (${file.id})`;
-                    } else if (file.id) {
-                        // Default fallback to ID
-                        // filename = `File (${file.id})`;
-                        filename = file.filename;
-                    }
-                    
-                    // Format the date if available
-                    let dateStr = 'Unknown';
-                    if (file.created_at) {
-                        const date = new Date(file.created_at);
-                        dateStr = date.toLocaleString();
-                    }
-                    
-                    // Determine status class
-                    let statusClass = '';
-                    const status = file.detail_status || file.status || 'Unknown';
-                    if (status === 'completed') statusClass = 'status-completed';
-                    else if (status === 'processing') statusClass = 'status-processing';
-                    else if (status === 'error') statusClass = 'status-error';
-                    
-                    // Format file size if available
-                    let sizeStr = 'Unknown';
-                    if (file.bytes) {
-                        sizeStr = formatFileSize(file.bytes);
-                    }
-                    
-                    // Create row content
-                    tr.innerHTML = `
-                        <td>
-                            <input type="checkbox" class="file-checkbox" data-id="${file.id}">
-                        </td>
-                        <td>
-                            <div class="file-name">${filename}</div>
-                            <div class="file-id">ID: ${file.id}</div>
-                        </td>
-                        <td>${dateStr}</td>
-                        <td>${sizeStr}</td>
-                        <td>
-                            <span class="file-status ${statusClass}">${status}</span>
-                        </td>
-                    `;
-                    
-                    tbody.appendChild(tr);
-                });
-                
-                table.appendChild(tbody);
-                listEl.appendChild(table);
-                
-                // Add expanded details section
-                const detailsSection = document.createElement('div');
-                detailsSection.id = 'file-details-section';
-                detailsSection.className = 'file-details-section hidden';
-                listEl.appendChild(detailsSection);
-                
-                // Add click handler to rows to show details
-                document.querySelectorAll('.file-row').forEach(row => {
-                    row.addEventListener('click', (e) => {
-                        // Don't trigger when clicking the checkbox
-                        if (e.target.type !== 'checkbox') {
-                            const fileId = row.querySelector('.file-checkbox').dataset.id;
-                            showFileDetails(fileId, data.files);
-                        }
-                    });
-                });
-            } else {
-                listEl.innerHTML = '<p>No files found in this vector store.</p>';
-            }
-            
-            selectedStoreFiles = data.files || [];
-        } catch (error) {
-            console.error('Error loading files:', error);
-            document.getElementById('fileList').innerHTML = 
-                `<p class="error">Failed to load files: ${error.message}</p>`;
-            showMessage('Failed to load files: ' + error.message, true);
-        }
-    }
-    
-    // Function to show detailed file information
-    function showFileDetails(fileId, files) {
-        const file = files.find(f => f.id === fileId);
-        if (!file) return;
-        
-        const detailsEl = document.getElementById('file-details-section');
-        detailsEl.classList.remove('hidden');
-        
-        // Format all available properties
-        const properties = [];
-        for (const [key, value] of Object.entries(file)) {
-            if (value !== null && value !== undefined) {
-                // Format date properties
-                let displayValue = value;
-                if (key.includes('created_at') || key.includes('updated_at')) {
-                    try {
-                        displayValue = new Date(value).toLocaleString();
-                    } catch (e) {
-                        // Keep original value if date conversion fails
-                    }
-                }
-                
-                properties.push(`<tr>
-                    <td class="property-name">${key}</td>
-                    <td class="property-value">${displayValue}</td>
-                </tr>`);
-            }
-        }
-        
-        // Get filename from multiple possible sources
-        let filename = 'Unknown filename';
-        if (file.filename) {
-            filename = file.filename;
-        } else if (file.purpose === 'assistants' && file.id) {
-            filename = `Assistant File (${file.id})`;
-        } else if (file.id) {
-            filename = `File (${file.id})`;
-        }
-        
-        detailsEl.innerHTML = `
-            <h3>Detailed File Information</h3>
-            <h4>${filename}</h4>
-            <table class="details-table">
-                <tbody>
-                    ${properties.join('')}
-                </tbody>
-            </table>
-            <button onclick="document.getElementById('file-details-section').classList.add('hidden')" class="close-details">Close Details</button>
-        `;
-        
-        detailsEl.scrollIntoView({ behavior: 'smooth' });
-    }
-    
-    // Helper function to format file size
-    function formatFileSize(bytes) {
-        if (!bytes || bytes === 0) return '0 Bytes';
-        
-        const k = 1024;
-        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-        const i = Math.floor(Math.log(bytes) / Math.log(k));
-        
-        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-    }
         
         // Create new vector store
         async function createVectorStore() {
@@ -697,6 +470,56 @@
             }
         }
         
+        // Load files for a vector store
+        async function loadFiles(storeId) {
+            try {
+                // Show loading indicator
+                const listEl = document.getElementById('fileList');
+                listEl.innerHTML = '<p><i>Loading files...</i></p>';
+                
+                const response = await fetch(`/storage-admin/vector-stores/${storeId}/files`);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                console.log("Files data:", data);
+                
+                listEl.innerHTML = '';
+                
+                if (data.files && data.files.length > 0) {
+                    // Create a simple list of files
+                    const ul = document.createElement('ul');
+                    ul.className = 'files-list';
+                    
+                    data.files.forEach(file => {
+                        const li = document.createElement('li');
+                        li.className = 'file-item';
+                        
+                        li.innerHTML = `
+                            <label>
+                                <input type="checkbox" class="file-checkbox" data-id="${file.id}">
+                                <span>${file.id}</span>
+                            </label>
+                        `;
+                        
+                        ul.appendChild(li);
+                    });
+                    
+                    listEl.appendChild(ul);
+                } else {
+                    listEl.innerHTML = '<p>No files found in this vector store.</p>';
+                }
+                
+                selectedStoreFiles = data.files || [];
+            } catch (error) {
+                console.error('Error loading files:', error);
+                document.getElementById('fileList').innerHTML = 
+                    `<p class="error">Failed to load files: ${error.message}</p>`;
+                showMessage('Failed to load files: ' + error.message, true);
+            }
+        }
+        
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {
             // Load initial data
@@ -711,8 +534,8 @@
                     loadFiles(selectedStoreId);
                 }
             });
-            document.getElementById('uploadFile').addEventListener('click', uploadFile);
             document.getElementById('deleteFiles').addEventListener('click', deleteSelectedFiles);
+            document.getElementById('uploadFile').addEventListener('click', uploadFile);
         });
     </script>
 </body>
