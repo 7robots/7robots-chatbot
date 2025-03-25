@@ -153,3 +153,22 @@ async def delete_files(request: FileDeleteRequest):
         return {"results": results}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/storage-admin/files/{file_id}")
+async def get_file_details(file_id: str):
+    try:
+        # Retrieve the file details from OpenAI API
+        file_details = client.files.retrieve(file_id)
+        
+        # Format the response with the requested details
+        return {
+            "id": file_id,
+            "filename": getattr(file_details, "filename", None),
+            "bytes": getattr(file_details, "bytes", None),
+            "created_at": getattr(file_details, "created_at", None),
+            "status": getattr(file_details, "status", None),
+            "purpose": getattr(file_details, "purpose", None),
+            "format": getattr(file_details, "format", None)
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

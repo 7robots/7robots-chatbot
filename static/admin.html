@@ -187,6 +187,49 @@
         .file-item:hover {
             background-color: #f5f5f5;
         }
+        .file-details-section {
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        
+        .details-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 15px;
+        }
+        
+        .details-table td {
+            padding: 8px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .property-name {
+            font-weight: bold;
+            width: 30%;
+        }
+        
+        .view-details-btn {
+            background-color: #007bff;
+            padding: 5px 10px;
+            font-size: 0.9em;
+        }
+        
+        .close-details {
+            margin-top: 10px;
+            background-color: #6c757d;
+        }
+        
+        .file-id-cell {
+            font-family: monospace;
+            word-break: break-all;
+        }
+        
+        .hidden {
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -488,25 +531,57 @@
                 listEl.innerHTML = '';
                 
                 if (data.files && data.files.length > 0) {
-                    // Create a simple list of files
-                    const ul = document.createElement('ul');
-                    ul.className = 'files-list';
+                    // Create a table for better formatting
+                    const table = document.createElement('table');
+                    table.className = 'files-table';
+                    
+                    // Add table header
+                    const thead = document.createElement('thead');
+                    thead.innerHTML = `
+                        <tr>
+                            <th style="width: 30px;"></th>
+                            <th>File ID</th>
+                            <th>Actions</th>
+                        </tr>
+                    `;
+                    table.appendChild(thead);
+                    
+                    // Create table body
+                    const tbody = document.createElement('tbody');
                     
                     data.files.forEach(file => {
-                        const li = document.createElement('li');
-                        li.className = 'file-item';
+                        const tr = document.createElement('tr');
+                        tr.className = 'file-row';
                         
-                        li.innerHTML = `
-                            <label>
+                        tr.innerHTML = `
+                            <td>
                                 <input type="checkbox" class="file-checkbox" data-id="${file.id}">
-                                <span>${file.id}</span>
-                            </label>
+                            </td>
+                            <td class="file-id-cell">${file.id}</td>
+                            <td>
+                                <button class="view-details-btn" data-id="${file.id}">View Details</button>
+                            </td>
                         `;
                         
-                        ul.appendChild(li);
+                        tbody.appendChild(tr);
                     });
                     
-                    listEl.appendChild(ul);
+                    table.appendChild(tbody);
+                    listEl.appendChild(table);
+                    
+                    // Add file details section
+                    const detailsSection = document.createElement('div');
+                    detailsSection.id = 'file-details-section';
+                    detailsSection.className = 'file-details-section hidden';
+                    listEl.appendChild(detailsSection);
+                    
+                    // Add click handlers for view details buttons
+                    document.querySelectorAll('.view-details-btn').forEach(btn => {
+                        btn.addEventListener('click', () => {
+                            const fileId = btn.dataset.id;
+                            getFileDetails(fileId);
+                        });
+                    });
                 } else {
                     listEl.innerHTML = '<p>No files found in this vector store.</p>';
                 }
@@ -518,6 +593,101 @@
                     `<p class="error">Failed to load files: ${error.message}</p>`;
                 showMessage('Failed to load files: ' + error.message, true);
             }
+        }
+        
+        // Get file details function
+        async function getFileDetails(fileId) {
+            try {
+                // Show loading indicator
+                const detailsSection = document.getElementById('file-details-section');
+                detailsSection.innerHTML = '<p><i>Loading file details...</i></p>';
+                detailsSection.classList.remove('hidden');
+                
+                const response = await fetch(`/storage-admin/files/${fileId}`);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const fileDetails = await response.json();
+                console.log("File details:", fileDetails);
+                
+                // Format file size
+                let sizeStr = 'Unknown';
+                if (fileDetails.bytes) {
+                    sizeStr = formatFileSize(fileDetails.bytes);
+                }
+                
+                // Format date
+                let dateStr = 'Unknown';
+                if (fileDetails.created_at) {
+                    const date = new Date(fileDetails.created_at);
+                    dateStr = date.toLocaleString();
+                }
+                
+                // Display file details
+                detailsSection.innerHTML = `
+                    <h3>File Details</h3>
+                    <table class="details-table">
+                        <tr>
+                            <td class="property-name">File ID:</td>
+                            <td>${fileDetails.id}</td>
+                        </tr>
+                        <tr>
+                            <td class="property-name">Filename:</td>
+                            <td>${fileDetails.filename || 'Unknown'}</td>
+                        </tr>
+                        <tr>
+                            <td class="property-name">File Size:</td>
+                            <td>${sizeStr}</td>
+                        </tr>
+                        <tr>
+                            <td class="property-name">Created Date:</td>
+                            <td>${dateStr}</td>
+                        </tr>
+                        <tr>
+                            <td class="property-name">Status:</td>
+                            <td>${fileDetails.status || 'Unknown'}</td>
+                        </tr>
+                        <tr>
+                            <td class="property-name">Purpose:</td>
+                            <td>${fileDetails.purpose || 'Unknown'}</td>
+                        </tr>
+                        <tr>
+                            <td class="property-name">Format:</td>
+                            <td>${fileDetails.format || 'Unknown'}</td>
+                        </tr>
+                    </table>
+                    <button id="close-details" class="close-details">Close Details</button>
+                `;
+                
+                // Add event listener to close button
+                document.getElementById('close-details').addEventListener('click', () => {
+                    detailsSection.classList.add('hidden');
+                });
+                
+            } catch (error) {
+                console.error('Error getting file details:', error);
+                document.getElementById('file-details-section').innerHTML = 
+                    `<p class="error">Failed to load file details: ${error.message}</p>
+                    <button id="close-details" class="close-details">Close</button>`;
+                
+                document.getElementById('close-details').addEventListener('click', () => {
+                    document.getElementById('file-details-section').classList.add('hidden');
+                });
+                
+                showMessage('Failed to load file details: ' + error.message, true);
+            }
+        }
+        
+        // Helper function to format file size
+        function formatFileSize(bytes) {
+            if (!bytes || bytes === 0) return '0 Bytes';
+            
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
         }
         
         // Initialize
