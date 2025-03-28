@@ -4,23 +4,20 @@ from fastapi import FastAPI, HTTPException, Depends, UploadFile, File
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
-from dotenv import load_dotenv
 from agents import Agent, Runner, WebSearchTool, FileSearchTool
 from typing import List, Optional
 import json
+import yaml
+from agents import set_default_openai_key
 
-# Load environment variables from .env file
-load_dotenv()
+# Load configuration from config.yaml
+with open("config.yaml", "r") as config_file:
+    config = yaml.safe_load(config_file)
 
-# Get the API key and vector store ID from environment variables
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-VECTOR_STORE_ID = os.getenv("VECTOR_STORE_ID")
-
-# Check if required environment variables are set
-if not OPENAI_API_KEY:
-    raise ValueError("OPENAI_API_KEY environment variable is not set")
-if not VECTOR_STORE_ID:
-    raise ValueError("VECTOR_STORE_ID environment variable is not set")
+# Get the API key and vector store ID from config with correct nested structure
+OPENAI_API_KEY = config.get("openai", {}).get("api_key")
+set_default_openai_key(OPENAI_API_KEY)
+VECTOR_STORE_ID = config.get("openai", {}).get("vector_store_id")
 
 # initialize the OpenAI client for vector store API calls
 client = OpenAI(
