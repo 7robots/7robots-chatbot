@@ -16,6 +16,12 @@ load_dotenv()
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 VECTOR_STORE_ID = os.getenv("VECTOR_STORE_ID")
 
+# Check if required environment variables are set
+if not OPENAI_API_KEY:
+    raise ValueError("OPENAI_API_KEY environment variable is not set")
+if not VECTOR_STORE_ID:
+    raise ValueError("VECTOR_STORE_ID environment variable is not set")
+
 # initialize the OpenAI client for vector store API calls
 client = OpenAI(
     api_key=OPENAI_API_KEY,
@@ -27,7 +33,7 @@ game_agent = Agent(
     instructions="You only answer questions about D&D with data from the file search tool",
     tools=[
         FileSearchTool(
-                max_num_results=2,
+                max_num_results=30,
                 vector_store_ids=[VECTOR_STORE_ID],
         ),
     ]

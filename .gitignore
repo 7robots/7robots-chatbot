@@ -1,3 +1,5 @@
 __pycache__/
 *.py[cod]
 *.class
+config.yaml
+__pycache__/agent.cpython-312.pyc
