@@ -82,7 +82,7 @@ async def get_chat_page():
 # Admin page endpoint
 @app.get("/admin")
 async def get_admin_page():
-    return FileResponse("static/admin.html")
+    return FileResponse("static/files.html")
 
 # Vector store management endpoints
 @app.get("/storage-admin/vector-stores")
