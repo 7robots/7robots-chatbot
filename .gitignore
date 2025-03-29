@@ -1,6 +1,14 @@
-__pycache__/*
-*.pyc
-*.class
+# Python cache files
+__pycache__/
+*/__pycache__/
+*.py[cod]
+*$py.class
+
+# Configuration files
 config.yaml
-__pycache__/agent.cpython-312.pyc
-__pycache__/agent.cpython-312.pyc
+
+# macOS system files
+.DS_Store
+
+# Git files
+.gitattributes
