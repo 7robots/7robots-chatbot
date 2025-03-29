@@ -1,4 +1,6 @@
-__pycache__/
+__pycache__/*
 *.pyc
 *.class
 config.yaml
+__pycache__/agent.cpython-312.pyc
+__pycache__/agent.cpython-312.pyc
