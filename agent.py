@@ -9,6 +9,8 @@ from typing import List, Optional
 import json
 import yaml
 from agents import set_default_openai_key
+import sys
+from fastapi import Request
 
 # Load configuration from config.yaml
 with open("config.yaml", "r") as config_file:
@@ -56,6 +58,10 @@ class VectorStoreRequest(BaseModel):
 class FileDeleteRequest(BaseModel):
     file_ids: List[str]
     vector_store_id: str
+
+# Model for API key updates
+class ApiKeyRequest(BaseModel):
+    api_key: str
 
 # quick test message at root
 @app.get("/")
@@ -175,3 +181,57 @@ async def get_file_details(file_id: str):
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+# Endpoint to get and update the OpenAI API key
+@app.get("/storage-admin/config")
+async def get_config():
+    try:
+        # Return just the API key (masked) and vector store ID for security
+        api_key = OPENAI_API_KEY
+        masked_key = "•" * (len(api_key) - 8) + api_key[-8:] if api_key else ""
+        
+        return {
+            "api_key": masked_key,
+            "vector_store_id": VECTOR_STORE_ID
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/storage-admin/config")
+async def update_config(request: ApiKeyRequest):
+    try:
+        global OPENAI_API_KEY
+        global client
+        
+        # Update the config file
+        config_path = "config.yaml"
+        
+        # Read existing config
+        with open(config_path, "r") as file:
+            config = yaml.safe_load(file) or {}
+            
+        # Make sure we have the openai section
+        if "openai" not in config:
+            config["openai"] = {}
+            
+        # Update the API key
+        config["openai"]["api_key"] = request.api_key
+        
+        # Save the updated config
+        with open(config_path, "w") as file:
+            yaml.dump(config, file)
+            
+        # Update the global variables and client
+        OPENAI_API_KEY = request.api_key
+        set_default_openai_key(OPENAI_API_KEY)
+        client = OpenAI(api_key=OPENAI_API_KEY)
+        
+        # Return success
+        return {"status": "success", "message": "API key updated successfully"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+# Endpoint to serve the start page
+@app.get("/start")
+async def get_start_page():
+    return FileResponse("static/start.html")
