@@ -80,7 +80,7 @@ async def get_chat_page():
     return FileResponse("static/index.html")
 
 # Admin page endpoint
-@app.get("/admin")
+@app.get("/files")
 async def get_admin_page():
     return FileResponse("static/files.html")
 
@@ -231,7 +231,7 @@ async def update_config(request: ApiKeyRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-# Endpoint to serve the start page
-@app.get("/start")
+# Endpoint to serve the admin
+@app.get("/admin")
 async def get_start_page():
-    return FileResponse("static/start.html")
+    return FileResponse("static/admin.html")
