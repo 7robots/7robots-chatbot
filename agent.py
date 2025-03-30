@@ -63,6 +63,10 @@ class FileDeleteRequest(BaseModel):
 class ApiKeyRequest(BaseModel):
     api_key: str
 
+# Add this model for vector store ID updates
+class VectorStoreIdRequest(BaseModel):
+    vector_store_id: str
+
 # quick test message at root
 @app.get("/")
 async def root():
@@ -228,6 +232,51 @@ async def update_config(request: ApiKeyRequest):
         
         # Return success
         return {"status": "success", "message": "API key updated successfully"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+# Add this endpoint to update the vector store ID
+@app.post("/storage-admin/config/vector-store")
+async def update_vector_store_id(request: VectorStoreIdRequest):
+    try:
+        global VECTOR_STORE_ID
+        global game_agent
+        
+        # Update the config file
+        config_path = "config.yaml"
+        
+        # Read existing config
+        with open(config_path, "r") as file:
+            config = yaml.safe_load(file) or {}
+            
+        # Make sure we have the openai section
+        if "openai" not in config:
+            config["openai"] = {}
+            
+        # Update the vector store ID
+        config["openai"]["vector_store_id"] = request.vector_store_id
+        
+        # Save the updated config
+        with open(config_path, "w") as file:
+            yaml.dump(config, file)
+            
+        # Update the global variables
+        VECTOR_STORE_ID = request.vector_store_id
+        
+        # Update the game agent with the new vector store ID
+        game_agent = Agent(
+            name="Game agent",
+            instructions="You only answer questions about D&D with data from the file search tool",
+            tools=[
+                FileSearchTool(
+                    max_num_results=30,
+                    vector_store_ids=[VECTOR_STORE_ID],
+                ),
+            ]
+        )
+        
+        # Return success
+        return {"status": "success", "message": "Vector store ID updated successfully"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

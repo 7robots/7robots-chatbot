@@ -199,6 +199,17 @@
             align-items: center;
             margin-bottom: 20px;
         }
+        /* Add these styles for vector store management */
+        .active-store {
+            background-color: #e8f5e9; /* Light green background */
+        }
+
+        .set-active-btn[disabled] {
+            background-color: #4CAF50; /* Green for current active store */
+            color: white;
+            opacity: 0.8;
+            cursor: default;
+        }
     </style>
 </head>
 <body>
@@ -211,84 +222,76 @@
     
     <div class="tab-container">
         <div class="tab-buttons">
-            <button class="tab-button active" onclick="openTab(event, 'configTab')">API Configuration</button>
-            <button class="tab-button" onclick="openTab(event, 'vectorStoresTab')">Vector Stores & Files</button>
+            <button class="tab-button active" onclick="openTab(event, 'configTab')">Assistant Configuration</button>
+            <button class="tab-button" onclick="openTab(event, 'vectorStoresTab')">File Management</button>
         </div>
         
-        <!-- API Configuration Tab -->
+        <!-- Assistant Configuration Tab -->
         <div id="configTab" class="tab-content active">
             <div class="info-box">
-                <p><strong>API Configuration</strong>: Manage your OpenAI API key and other settings.</p>
+                <p><strong>Assistant Configuration</strong>: Manage your OpenAI API key and vector stores.</p>
                 <p>This will update the config.yaml file used by the application.</p>
             </div>
             
+            <!-- API Key Section -->
+            <h2>API Configuration</h2>
             <div class="form-group">
                 <label for="apiKey">OpenAI API Key:</label>
                 <input type="password" id="apiKey" placeholder="Enter your OpenAI API key" autocomplete="off">
                 <small>Your OpenAI API key is stored in the config.yaml file.</small>
             </div>
-            
-            <div class="form-group">
-                <label for="vectorStoreId">Vector Store ID:</label>
-                <input type="text" id="vectorStoreId" placeholder="Vector Store ID" readonly>
-                <small>This is your current vector store ID (read-only).</small>
-            </div>
-            
-            <button id="saveConfigButton">Save Configuration</button>
+            <button id="saveConfigButton">Save API Key</button>
             
             <div class="info-box" style="margin-top: 20px; background-color: #fff3cd; color: #856404;">
-                <p><strong>Note:</strong> Changes to the API key will take effect immediately for new requests. The application will use the new API key without requiring a restart.</p>
-            </div>
-        </div>
-        
-        <!-- Vector Stores & Files Tab -->
-        <div id="vectorStoresTab" class="tab-content">
-            <div class="info-box">
-                <p><strong>Vector Stores & Files</strong>: Manage your vector stores and the files within them.</p>
+                <p><strong>Note:</strong> Changes to the API key will take effect immediately for new requests.</p>
             </div>
             
-            <div class="file-container">
-                <div class="store-list">
-                    <h2>Vector Stores</h2>
-                    <button id="refreshStores" class="secondary">Refresh List</button>
-                    <div id="vectorStoreList"></div>
-                    
-                    <h3>Create New Vector Store</h3>
-                    <div class="form-group">
-                        <input type="text" id="newStoreName" placeholder="Name">
-                    </div>
-                    <div class="form-group">
-                        <textarea id="newStoreDescription" placeholder="Description (optional)"></textarea>
-                    </div>
-                    <button id="createStore">Create Vector Store</button>
+            <!-- Vector Store Management Section -->
+            <h2>Vector Store Management</h2>
+            <button id="refreshStores" class="secondary">Refresh Vector Store List</button>
+            
+            <div class="form-group" style="margin-top: 15px;">
+                <label for="vectorStoreId">Current Active Vector Store:</label>
+                <input type="text" id="vectorStoreId" placeholder="Vector Store ID" readonly>
+            </div>
+            
+            <div id="vectorStoreList" style="margin: 20px 0;"></div>
+            
+            <h3>Create New Vector Store</h3>
+            <div class="form-group">
+                <input type="text" id="newStoreName" placeholder="Name">
+            </div>
+            <div class="form-group">
+                <textarea id="newStoreDescription" placeholder="Description (optional)"></textarea>
+            </div>
+            <button id="createStore">Create Vector Store</button>
+        </div>
+        
+        <!-- File Management Tab -->
+        <div id="vectorStoresTab" class="tab-content">
+            <div class="info-box">
+                <p><strong>File Management</strong>: Manage files in the current vector store.</p>
+                <p>Current Vector Store: <strong id="currentVectorStoreName">Loading...</strong></p>
+            </div>
+            
+            <div id="noVectorStoreWarning" class="info-box" style="background-color: #fff3cd; color: #856404;">
+                <p><strong>Note:</strong> No active vector store selected. Please select or create a vector store in the Assistant Configuration tab.</p>
+            </div>
+            
+            <div id="fileManagementContainer" class="hidden">
+                <div class="file-actions">
+                    <button id="refreshFiles" class="secondary">Refresh Files</button>
+                    <button id="deleteFiles" class="delete">Delete Selected Files</button>
                 </div>
                 
-                <div class="file-details">
-                    <div id="storeDetails" class="hidden">
-                        <h2>Store: <span id="selectedStoreName"></span></h2>
-                        <p>ID: <span id="selectedStoreId"></span></p>
-                        <button id="deleteStore" class="delete">Delete This Vector Store</button>
-                        
-                        <h3>Files</h3>
-                        <div class="file-actions">
-                            <button id="refreshFiles" class="secondary">Refresh Files</button>
-                            <button id="deleteFiles" class="delete">Delete Selected Files</button>
-                        </div>
-                        
-                        <div id="fileList"></div>
-                        <div id="fileDetailsSection" class="file-details-panel hidden"></div>
-                        
-                        <h3>Upload New File</h3>
-                        <div class="form-group">
-                            <input type="file" id="fileUpload">
-                        </div>
-                        <button id="uploadFile">Upload File</button>
-                    </div>
-                    
-                    <div id="noStoreSelected">
-                        <p>Select a vector store from the left panel to manage its files.</p>
-                    </div>
+                <div id="fileList"></div>
+                <div id="fileDetailsSection" class="file-details-panel hidden"></div>
+                
+                <h3>Upload New File</h3>
+                <div class="form-group">
+                    <input type="file" id="fileUpload">
                 </div>
+                <button id="uploadFile">Upload File</button>
             </div>
         </div>
     </div>
@@ -297,6 +300,7 @@
         // Global variables
         let selectedStoreId = null;
         let selectedStoreFiles = [];
+        let activeVectorStoreId = null;
         
         // Tab functionality
         function openTab(evt, tabName) {
@@ -359,6 +363,10 @@
                 }
                 if (config.vector_store_id) {
                     document.getElementById('vectorStoreId').value = config.vector_store_id;
+                    activeVectorStoreId = config.vector_store_id;
+                    
+                    // Update file management tab
+                    updateFileManagementTab();
                 }
             } catch (error) {
                 console.error('Error loading configuration:', error);
@@ -406,9 +414,34 @@
             }
         }
         
-        // ----- Vector Store Functions -----
+        // Function to update file management tab based on active vector store
+        function updateFileManagementTab() {
+            const noWarning = document.getElementById('noVectorStoreWarning');
+            const fileContainer = document.getElementById('fileManagementContainer');
+            const nameElement = document.getElementById('currentVectorStoreName');
+            
+            if (activeVectorStoreId) {
+                // Hide warning, show file management
+                noWarning.classList.add('hidden');
+                fileContainer.classList.remove('hidden');
+                
+                // Find the store name
+                const storeItem = document.querySelector(`.store-item[data-id="${activeVectorStoreId}"]`);
+                const storeName = storeItem ? storeItem.querySelector('strong').textContent : activeVectorStoreId;
+                
+                nameElement.textContent = storeName;
+                
+                // Load files for the active vector store
+                loadFiles(activeVectorStoreId);
+            } else {
+                // Show warning, hide file management
+                noWarning.classList.remove('hidden');
+                fileContainer.classList.add('hidden');
+                nameElement.textContent = 'None selected';
+            }
+        }
         
-        // Load vector stores
+        // Update vector stores loading to include set-as-active button
         async function loadVectorStores() {
             try {
                 const response = await fetch('/storage-admin/vector-stores');
@@ -418,22 +451,62 @@
                 listEl.innerHTML = '';
                 
                 if (data.vector_stores && data.vector_stores.length > 0) {
+                    // Create a table for better formatting
+                    const table = document.createElement('table');
+                    table.className = 'files-table';
+                    
+                    // Add table header
+                    const thead = document.createElement('thead');
+                    thead.innerHTML = `
+                        <tr>
+                            <th>Name</th>
+                            <th>ID</th>
+                            <th>Actions</th>
+                        </tr>
+                    `;
+                    table.appendChild(thead);
+                    
+                    // Create table body
+                    const tbody = document.createElement('tbody');
+                    
                     data.vector_stores.forEach(store => {
-                        const div = document.createElement('div');
-                        div.className = 'store-item';
-                        div.dataset.id = store.id;
-                        div.innerHTML = `
-                            <strong>${store.name}</strong>
-                            <div><small>ID: ${store.id}</small></div>
-                        `;
+                        const tr = document.createElement('tr');
+                        tr.className = 'store-item';
+                        tr.dataset.id = store.id;
                         
-                        div.addEventListener('click', () => selectStore(store));
-                        
-                        if (selectedStoreId === store.id) {
-                            div.classList.add('selected');
+                        if (store.id === activeVectorStoreId) {
+                            tr.classList.add('active-store');
                         }
                         
-                        listEl.appendChild(div);
+                        tr.innerHTML = `
+                            <td><strong>${store.name}</strong></td>
+                            <td><small>${store.id}</small></td>
+                            <td>
+                                <button class="set-active-btn secondary" data-id="${store.id}" 
+                                    ${store.id === activeVectorStoreId ? 'disabled' : ''}>
+                                    ${store.id === activeVectorStoreId ? 'Current Active Store' : 'Set as Active'}
+                                </button>
+                                <button class="delete-store-btn delete" data-id="${store.id}">Delete</button>
+                            </td>
+                        `;
+                        
+                        tbody.appendChild(tr);
+                    });
+                    
+                    table.appendChild(tbody);
+                    listEl.appendChild(table);
+                    
+                    // Add event listeners for buttons
+                    document.querySelectorAll('.set-active-btn').forEach(btn => {
+                        btn.addEventListener('click', (e) => {
+                            setAsActiveVectorStore(e.target.dataset.id);
+                        });
+                    });
+                    
+                    document.querySelectorAll('.delete-store-btn').forEach(btn => {
+                        btn.addEventListener('click', (e) => {
+                            deleteVectorStore(e.target.dataset.id);
+                        });
                     });
                 } else {
                     listEl.innerHTML = '<p>No vector stores found.</p>';
@@ -444,72 +517,60 @@
             }
         }
         
-        // Select a store
-        function selectStore(store) {
-            selectedStoreId = store.id;
-            document.getElementById('selectedStoreName').textContent = store.name;
-            document.getElementById('selectedStoreId').textContent = store.id;
-            
-            document.getElementById('storeDetails').classList.remove('hidden');
-            document.getElementById('noStoreSelected').classList.add('hidden');
-            
-            // Update selection in the list
-            document.querySelectorAll('.store-item').forEach(item => {
-                item.classList.toggle('selected', item.dataset.id === store.id);
-            });
-            
-            // Load files for this store
-            loadFiles(store.id);
-        }
-        
-        // Create new vector store
-        async function createVectorStore() {
-            const name = document.getElementById('newStoreName').value.trim();
-            const description = document.getElementById('newStoreDescription').value.trim();
-            
-            if (!name) {
-                showMessage('Please enter a name for the vector store', true);
+        // Function to set as active vector store
+        async function setAsActiveVectorStore(storeId) {
+            if (!storeId) {
+                showMessage('Invalid vector store selected', true);
                 return;
             }
             
             try {
-                const response = await fetch('/storage-admin/vector-stores', {
+                // First check if this is just a cosmetic change
+                if (storeId === activeVectorStoreId) {
+                    showMessage('This store is already active');
+                    return;
+                }
+                
+                // Here we need to create an endpoint in agent.py to update the active vector store
+                // For now, we'll just update the config.yaml file with the existing API endpoint
+                const response = await fetch('/storage-admin/config/vector-store', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        name,
-                        description: description || undefined
+                        vector_store_id: storeId
                     })
                 });
                 
                 if (!response.ok) {
                     const error = await response.json();
-                    throw new Error(error.detail || 'Failed to create vector store');
+                    throw new Error(error.detail || 'Failed to update active vector store');
                 }
                 
                 const result = await response.json();
-                showMessage(`Vector store "${name}" created successfully!`);
+                showMessage(`Vector store set as active successfully!`);
                 
-                // Clear input fields
-                document.getElementById('newStoreName').value = '';
-                document.getElementById('newStoreDescription').value = '';
+                // Update the global variable
+                activeVectorStoreId = storeId;
                 
-                // Refresh the list
-                await loadVectorStores();
+                // Update the displayed vector store ID
+                document.getElementById('vectorStoreId').value = storeId;
                 
-                // Select the newly created store
-                selectStore(result);
+                // Update file management tab
+                updateFileManagementTab();
+                
+                // Refresh the vector stores to update the UI
+                loadVectorStores();
             } catch (error) {
-                console.error('Error creating vector store:', error);
-                showMessage('Failed to create vector store: ' + error.message, true);
+                console.error('Error setting active vector store:', error);
+                showMessage('Failed to set active vector store: ' + error.message, true);
             }
         }
         
-        // Delete vector store
-        async function deleteVectorStore() {
-            if (!selectedStoreId) {
+        // Update delete vector store function
+        async function deleteVectorStore(storeId) {
+            if (!storeId) {
                 showMessage('No vector store selected', true);
                 return;
             }
@@ -519,7 +580,7 @@
             }
             
             try {
-                const response = await fetch(`/storage-admin/vector-stores/${selectedStoreId}`, {
+                const response = await fetch(`/storage-admin/vector-stores/${storeId}`, {
                     method: 'DELETE'
                 });
                 
@@ -530,11 +591,12 @@
                 
                 showMessage('Vector store deleted successfully!');
                 
-                // Reset selection
-                selectedStoreId = null;
-                document.getElementById('storeDetails').classList.add('hidden');
-                document.getElementById('noStoreSelected').classList.remove('hidden');
-                document.getElementById('fileDetailsSection').classList.add('hidden');
+                // If we deleted the active store, clear it
+                if (storeId === activeVectorStoreId) {
+                    activeVectorStoreId = null;
+                    document.getElementById('vectorStoreId').value = '';
+                    updateFileManagementTab();
+                }
                 
                 // Refresh the list
                 await loadVectorStores();
