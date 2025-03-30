@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OpenAI Chatbot Configuration</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        h1 {
+            color: #333;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 10px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="text"], input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .error {
+            color: #dc3545;
+            padding: 10px;
+            background-color: #f8d7da;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+        .success {
+            color: #28a745;
+            padding: 10px;
+            background-color: #d4edda;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+        .hidden {
+            display: none;
+        }
+        .buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        .info-box {
+            background-color: #e8f4f8;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+        .warning {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+    </style>
+</head>
+<body>
+    <h1>OpenAI Chatbot Configuration</h1>
+    
+    <div id="message" class="hidden"></div>
+    
+    <div class="info-box">
+        <p>This page allows you to configure the OpenAI API key for your chatbot application. The API key is required to connect to OpenAI's services.</p>
+        <p><strong>Important:</strong> Keep your API key secure. Do not share it with unauthorized users.</p>
+    </div>
+    
+    <div class="form-group">
+        <label for="apiKey">OpenAI API Key:</label>
+        <input type="password" id="apiKey" placeholder="Enter your OpenAI API key" autocomplete="off">
+        <small>Your OpenAI API key is stored in the config.yaml file.</small>
+    </div>
+    
+    <div class="form-group">
+        <label for="vectorStoreId">Vector Store ID:</label>
+        <input type="text" id="vectorStoreId" placeholder="Vector Store ID" readonly>
+        <small>This is your current vector store ID (read-only).</small>
+    </div>
+    
+    <div class="buttons">
+        <button id="saveButton">Save Configuration</button>
+        <a href="/files"><button type="button">Go to Files Panel</button></a>  <!-- Updated button text -->
+    </div>
+    
+    <div class="info-box warning" style="margin-top: 30px;">
+        <p><strong>Note:</strong> Changes to the API key will take effect immediately for new requests. The application will use the new API key without requiring a restart.</p>
+    </div>
+    
+    <script>
+        // Function to show a message
+        function showMessage(text, isError = false) {
+            const messageEl = document.getElementById('message');
+            messageEl.textContent = text;
+            messageEl.className = isError ? 'error' : 'success';
+            messageEl.classList.remove('hidden');
+            
+            // Hide message after 5 seconds
+            setTimeout(() => {
+                messageEl.classList.add('hidden');
+            }, 5000);
+        }
+        
+        // Function to load current configuration
+        async function loadConfig() {
+            try {
+                const response = await fetch('/storage-admin/config');
+                if (!response.ok) {
+                    throw new Error('Failed to load configuration');
+                }
+                
+                const config = await response.json();
+                
+                // Set field values
+                if (config.api_key) {
+                    document.getElementById('apiKey').placeholder = config.api_key;
+                }
+                if (config.vector_store_id) {
+                    document.getElementById('vectorStoreId').value = config.vector_store_id;
+                }
+            } catch (error) {
+                console.error('Error loading configuration:', error);
+                showMessage('Failed to load configuration: ' + error.message, true);
+            }
+        }
+        
+        // Function to save configuration
+        async function saveConfig() {
+            const apiKey = document.getElementById('apiKey').value.trim();
+            
+            // Validate input
+            if (!apiKey) {
+                showMessage('Please enter your OpenAI API key', true);
+                return;
+            }
+            
+            try {
+                const response = await fetch('/storage-admin/config', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        api_key: apiKey
+                    })
+                });
+                
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.detail || 'Failed to update configuration');
+                }
+                
+                const result = await response.json();
+                showMessage('Configuration saved successfully!');
+                
+                // Clear input field
+                document.getElementById('apiKey').value = '';
+                
+                // Reload the configuration
+                await loadConfig();
+            } catch (error) {
+                console.error('Error saving configuration:', error);
+                showMessage('Failed to save configuration: ' + error.message, true);
+            }
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            // Load current configuration
+            loadConfig();
+            
+            // Add event listener for save button
+            document.getElementById('saveButton').addEventListener('click', saveConfig);
+        });
+    </script>
+</body>
+</html>
