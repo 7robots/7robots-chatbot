@@ -1,4 +1,4 @@
--chatbot/static/admin.html -->
+/admin.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -30,21 +30,21 @@
             border-bottom: 1px solid #ddd;
         }
         .tab-button {
-            background-color: #e0e0e0;
+            background-color: #e0e0e0; /* Darker gray background */
             border: none;
             padding: 12px 24px;
             cursor: pointer;
             font-size: 16px;
             transition: 0.3s;
-            color: #333;
+            color: #333; /* Darker text for better readability */
             border-top-left-radius: 4px;
             border-top-right-radius: 4px;
             margin-right: 2px;
-            font-weight: 500;
+            font-weight: 500; /* Make the text slightly bolder */
         }
         
         .tab-button:hover {
-            background-color: #ccc;
+            background-color: #ccc; /* Even darker on hover */
         }
         
         .tab-button.active {
@@ -199,11 +199,13 @@
             align-items: center;
             margin-bottom: 20px;
         }
+        /* Add these styles for vector store management */
         .active-store {
-            background-color: #e8f5e9;
+            background-color: #e8f5e9; /* Light green background */
         }
+
         .set-active-btn[disabled] {
-            background-color: #4CAF50;
+            background-color: #4CAF50; /* Green for current active store */
             color: white;
             opacity: 0.8;
             cursor: default;
@@ -238,7 +240,7 @@
                 <input type="password" id="apiKey" placeholder="Enter your OpenAI API key" autocomplete="off">
                 <small>Your OpenAI API key is stored in the config.yaml file.</small>
             </div>
-            <button onclick="saveConfig()">Save API Key</button>
+            <button id="saveConfigButton" onclick="saveConfig()">Save API Key</button>
             
             <div class="info-box" style="margin-top: 20px; background-color: #fff3cd; color: #856404;">
                 <p><strong>Note:</strong> Changes to the API key will take effect immediately for new requests.</p>
@@ -246,7 +248,7 @@
             
             <!-- Vector Store Management Section -->
             <h2>Vector Store Management</h2>
-            <button onclick="loadVectorStores()" class="secondary">Refresh Vector Store List</button>
+            <button id="refreshStores" onclick="loadVectorStores()" class="secondary">Refresh Vector Store List</button>
             
             <div class="form-group" style="margin-top: 15px;">
                 <label for="vectorStoreId">Current Active Vector Store:</label>
@@ -262,7 +264,7 @@
             <div class="form-group">
                 <textarea id="newStoreDescription" placeholder="Description (optional)"></textarea>
             </div>
-            <button onclick="createVectorStore()">Create Vector Store</button>
+            <button id="createStore" onclick="createVectorStore()">Create Vector Store</button>
         </div>
         
         <!-- File Management Tab -->
@@ -278,8 +280,8 @@
             
             <div id="fileManagementContainer" class="hidden">
                 <div class="file-actions">
-                    <button onclick="loadFiles(activeVectorStoreId)" class="secondary">Refresh Files</button>
-                    <button onclick="deleteSelectedFiles()" class="delete">Delete Selected Files</button>
+                    <button id="refreshFiles" onclick="loadFiles(activeVectorStoreId)" class="secondary">Refresh Files</button>
+                    <button id="deleteFiles" onclick="deleteSelectedFiles()" class="delete">Delete Selected Files</button>
                 </div>
                 
                 <div id="fileList"></div>
@@ -289,17 +291,16 @@
                 <div class="form-group">
                     <input type="file" id="fileUpload">
                 </div>
-                <button onclick="uploadFile()">Upload File</button>
+                <button id="uploadFile" onclick="uploadFile()">Upload File</button>
             </div>
         </div>
     </div>
     
     <script>
         // Global variables
-        let activeVectorStoreId = null;
+        let selectedStoreId = null;
         let selectedStoreFiles = [];
-        
-        // ----- Helper Functions -----
+        let activeVectorStoreId = null;
         
         // Tab functionality
         function openTab(evt, tabName) {
@@ -320,7 +321,7 @@
             evt.currentTarget.classList.add("active");
         }
         
-        // Show temporary message
+        // Helper functions
         function showMessage(text, isError = false) {
             const messageEl = document.getElementById('message');
             messageEl.textContent = text;
@@ -399,6 +400,7 @@
                     throw new Error(error.detail || 'Failed to update configuration');
                 }
                 
+                const result = await response.json();
                 showMessage('API key updated successfully!');
                 
                 // Clear input field
@@ -412,9 +414,7 @@
             }
         }
         
-        // ----- Vector Store Functions -----
-        
-        // Update file management tab based on active vector store
+        // Function to update file management tab based on active vector store
         function updateFileManagementTab() {
             const noWarning = document.getElementById('noVectorStoreWarning');
             const fileContainer = document.getElementById('fileManagementContainer');
@@ -441,7 +441,7 @@
             }
         }
         
-        // Load vector stores
+        // Update vector stores loading to include set-as-active button
         async function loadVectorStores() {
             try {
                 const response = await fetch('/storage-admin/vector-stores');
@@ -482,11 +482,11 @@
                             <td><strong>${store.name}</strong></td>
                             <td><small>${store.id}</small></td>
                             <td>
-                                <button onclick="setAsActiveVectorStore('${store.id}')" class="secondary" 
+                                <button class="set-active-btn secondary" data-id="${store.id}" 
                                     ${store.id === activeVectorStoreId ? 'disabled' : ''}>
                                     ${store.id === activeVectorStoreId ? 'Current Active Store' : 'Set as Active'}
                                 </button>
-                                <button onclick="deleteVectorStore('${store.id}')" class="delete">Delete</button>
+                                <button class="delete-store-btn delete" data-id="${store.id}">Delete</button>
                             </td>
                         `;
                         
@@ -495,6 +495,17 @@
                     
                     table.appendChild(tbody);
                     listEl.appendChild(table);
+                    
+                    // Add event listeners for buttons
+                    document.querySelectorAll('.set-active-btn').forEach(btn => {
+                        btn.dataset.onclick = `setAsActiveVectorStore('${btn.dataset.id}')`;
+                        btn.setAttribute('onclick', `setAsActiveVectorStore('${btn.dataset.id}')`);
+                    });
+                    
+                    document.querySelectorAll('.delete-store-btn').forEach(btn => {
+                        btn.dataset.onclick = `deleteVectorStore('${btn.dataset.id}')`;
+                        btn.setAttribute('onclick', `deleteVectorStore('${btn.dataset.id}')`);
+                    });
                 } else {
                     listEl.innerHTML = '<p>No vector stores found.</p>';
                 }
@@ -504,48 +515,7 @@
             }
         }
         
-        // Create new vector store
-        async function createVectorStore() {
-            const name = document.getElementById('newStoreName').value.trim();
-            const description = document.getElementById('newStoreDescription').value.trim();
-            
-            if (!name) {
-                showMessage('Please enter a name for the vector store', true);
-                return;
-            }
-            
-            try {
-                const response = await fetch('/storage-admin/vector-stores', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        name,
-                        description: description || undefined
-                    })
-                });
-                
-                if (!response.ok) {
-                    const error = await response.json();
-                    throw new Error(error.detail || 'Failed to create vector store');
-                }
-                
-                showMessage(`Vector store "${name}" created successfully!`);
-                
-                // Clear input fields
-                document.getElementById('newStoreName').value = '';
-                document.getElementById('newStoreDescription').value = '';
-                
-                // Refresh the list
-                await loadVectorStores();
-            } catch (error) {
-                console.error('Error creating vector store:', error);
-                showMessage('Failed to create vector store: ' + error.message, true);
-            }
-        }
-        
-        // Set as active vector store
+        // Function to set as active vector store
         async function setAsActiveVectorStore(storeId) {
             if (!storeId) {
                 showMessage('Invalid vector store selected', true);
@@ -559,6 +529,8 @@
                     return;
                 }
                 
+                // Here we need to create an endpoint in agent.py to update the active vector store
+                // For now, we'll just update the config.yaml file with the existing API endpoint
                 const response = await fetch('/storage-admin/config/vector-store', {
                     method: 'POST',
                     headers: {
@@ -574,6 +546,7 @@
                     throw new Error(error.detail || 'Failed to update active vector store');
                 }
                 
+                const result = await response.json();
                 showMessage(`Vector store set as active successfully!`);
                 
                 // Update the global variable
@@ -593,7 +566,7 @@
             }
         }
         
-        // Delete vector store
+        // Update delete vector store function
         async function deleteVectorStore(storeId) {
             if (!storeId) {
                 showMessage('No vector store selected', true);
@@ -635,10 +608,6 @@
         
         // Load files for a vector store
         async function loadFiles(storeId) {
-            if (!storeId) {
-                return;
-            }
-            
             try {
                 // Show loading indicator
                 const listEl = document.getElementById('fileList');
@@ -650,6 +619,7 @@
                 }
                 
                 const data = await response.json();
+                console.log("Files data:", data);
                 
                 listEl.innerHTML = '';
                 
@@ -682,7 +652,7 @@
                             </td>
                             <td>${file.id}</td>
                             <td>
-                                <button onclick="getFileDetails('${file.id}')" class="secondary">View Details</button>
+                                <button class="view-details-btn secondary" data-id="${file.id}">View Details</button>
                             </td>
                         `;
                         
@@ -691,6 +661,14 @@
                     
                     table.appendChild(tbody);
                     listEl.appendChild(table);
+                    
+                    // Add click handlers for view details buttons
+                    document.querySelectorAll('.view-details-btn').forEach(btn => {
+                        btn.addEventListener('click', () => {
+                            const fileId = btn.dataset.id;
+                            getFileDetails(fileId);
+                        });
+                    });
                 } else {
                     listEl.innerHTML = '<p>No files found in this vector store.</p>';
                 }
@@ -721,6 +699,7 @@
                 }
                 
                 const fileDetails = await response.json();
+                console.log("File details:", fileDetails);
                 
                 // Format file size
                 let sizeStr = 'Unknown';
@@ -768,25 +747,31 @@
                             <td>${fileDetails.format || 'Unknown'}</td>
                         </tr>
                     </table>
-                    <button onclick="closeFileDetails()" class="secondary">Close Details</button>
+                    <button id="closeDetails" class="secondary">Close Details</button>
                 `;
+                
+                // Add event listener to close button
+                document.getElementById('closeDetails').addEventListener('click', () => {
+                    detailsSection.classList.add('hidden');
+                });
+                
             } catch (error) {
                 console.error('Error getting file details:', error);
                 document.getElementById('fileDetailsSection').innerHTML = 
                     `<p class="error">Failed to load file details: ${error.message}</p>
-                    <button onclick="closeFileDetails()" class="secondary">Close</button>`;
+                    <button id="closeDetails" class="secondary">Close</button>`;
+                
+                document.getElementById('closeDetails').addEventListener('click', () => {
+                    document.getElementById('fileDetailsSection').classList.add('hidden');
+                });
                 
                 showMessage('Failed to load file details: ' + error.message, true);
             }
         }
         
-        // Close file details panel
-        function closeFileDetails() {
-            document.getElementById('fileDetailsSection').classList.add('hidden');
-        }
-        
-        // Upload file
+        // Fix the uploadFile function in admin.html
         async function uploadFile() {
+            // Use activeVectorStoreId instead of selectedStoreId
             if (!activeVectorStoreId) {
                 showMessage('No active vector store selected', true);
                 return;
@@ -806,6 +791,7 @@
                 // Show loading message
                 showMessage('Uploading file... This may take a while for large files.', false);
                 
+                // Use activeVectorStoreId instead of selectedStoreId in the URL
                 const response = await fetch(`/storage-admin/vector-stores/${activeVectorStoreId}/files`, {
                     method: 'POST',
                     body: formData
@@ -829,7 +815,7 @@
             }
         }
         
-        // Delete selected files
+        // Fix the deleteSelectedFiles function in admin.html
         async function deleteSelectedFiles() {
             const selectedFileIds = Array.from(document.querySelectorAll('.file-checkbox:checked'))
                 .map(checkbox => checkbox.dataset.id);
@@ -851,7 +837,7 @@
                     },
                     body: JSON.stringify({
                         file_ids: selectedFileIds,
-                        vector_store_id: activeVectorStoreId
+                        vector_store_id: activeVectorStoreId  // Use activeVectorStoreId here
                     })
                 });
                 
@@ -866,17 +852,23 @@
                 document.getElementById('fileDetailsSection').classList.add('hidden');
                 
                 // Refresh files
-                await loadFiles(activeVectorStoreId);
+                await loadFiles(activeVectorStoreId);  // Use activeVectorStoreId here
             } catch (error) {
                 console.error('Error deleting files:', error);
                 showMessage('Failed to delete files: ' + error.message, true);
             }
         }
         
-        // Initialize - runs when page loads
+        // Initialize
         document.addEventListener('DOMContentLoaded', () => {
+            // Load initial data
             loadConfig();
             loadVectorStores();
+            
+            // Update file management tab with current active store
+            if (activeVectorStoreId) {
+                updateFileManagementTab();
+            }
         });
     </script>
 </body>
