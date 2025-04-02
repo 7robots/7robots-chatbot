@@ -119,28 +119,51 @@ async def delete_vector_store(vector_store_id: str):
 @app.post("/storage-admin/vector-stores/{vector_store_id}/files")
 async def upload_file(vector_store_id: str, file: UploadFile = File(...)):
     try:
-        # Save the uploaded file temporarily
-        temp_file_path = f"temp_{file.filename}"
-        with open(temp_file_path, "wb") as buffer:
-            content = await file.read()
-            buffer.write(content)
+        # Get the original filename
+        original_filename = file.filename
         
-        # Upload the file to OpenAI vector store
+        # First, upload the file to get a file_id
+        file_content = await file.read()
+        
+        # Create a temporary file with the original filename
+        # Use a dedicated temp directory to avoid conflicts
+        os.makedirs("temp_uploads", exist_ok=True)
+        temp_file_path = os.path.join("temp_uploads", original_filename)
+        
+        with open(temp_file_path, "wb") as temp_file:
+            temp_file.write(file_content)
+        
+        # Upload file to OpenAI files API
         with open(temp_file_path, "rb") as f:
-            response = client.vector_stores.files.create(
-                vector_store_id=vector_store_id,
-                file_id=f
+            file_upload_response = client.files.create(
+                file=f,
+                purpose="assistants"
             )
-            
-        # Clean up the temporary file
-        os.remove(temp_file_path)
+            file_id = file_upload_response.id
         
+        # Now associate the file_id with the vector store
+        response = client.vector_stores.files.create(
+            vector_store_id=vector_store_id,
+            file_id=file_id
+        )
+        
+        # Clean up temporary file
+        if os.path.exists(temp_file_path):
+            os.remove(temp_file_path)
+            
         return response
+        
     except Exception as e:
-        # Clean up the temporary file if it exists
+        # Clean up temp file if it exists
         if 'temp_file_path' in locals() and os.path.exists(temp_file_path):
             os.remove(temp_file_path)
-        raise HTTPException(status_code=500, detail=str(e))
+            
+        # Detailed error logging
+        import traceback
+        error_details = str(e) + "\n" + traceback.format_exc()
+        print(error_details)
+        
+        raise HTTPException(status_code=500, detail=f"Error uploading file: {str(e)}")
 
 @app.get("/storage-admin/vector-stores/{vector_store_id}/files")
 async def list_files(vector_store_id: str):

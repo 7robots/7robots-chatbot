@@ -240,7 +240,7 @@
                 <input type="password" id="apiKey" placeholder="Enter your OpenAI API key" autocomplete="off">
                 <small>Your OpenAI API key is stored in the config.yaml file.</small>
             </div>
-            <button id="saveConfigButton">Save API Key</button>
+            <button id="saveConfigButton" onclick="saveConfig()">Save API Key</button>
             
             <div class="info-box" style="margin-top: 20px; background-color: #fff3cd; color: #856404;">
                 <p><strong>Note:</strong> Changes to the API key will take effect immediately for new requests.</p>
@@ -248,7 +248,7 @@
             
             <!-- Vector Store Management Section -->
             <h2>Vector Store Management</h2>
-            <button id="refreshStores" class="secondary">Refresh Vector Store List</button>
+            <button id="refreshStores" onclick="loadVectorStores()" class="secondary">Refresh Vector Store List</button>
             
             <div class="form-group" style="margin-top: 15px;">
                 <label for="vectorStoreId">Current Active Vector Store:</label>
@@ -264,7 +264,7 @@
             <div class="form-group">
                 <textarea id="newStoreDescription" placeholder="Description (optional)"></textarea>
             </div>
-            <button id="createStore">Create Vector Store</button>
+            <button id="createStore" onclick="createVectorStore()">Create Vector Store</button>
         </div>
         
         <!-- File Management Tab -->
@@ -280,8 +280,8 @@
             
             <div id="fileManagementContainer" class="hidden">
                 <div class="file-actions">
-                    <button id="refreshFiles" class="secondary">Refresh Files</button>
-                    <button id="deleteFiles" class="delete">Delete Selected Files</button>
+                    <button id="refreshFiles" onclick="loadFiles(activeVectorStoreId)" class="secondary">Refresh Files</button>
+                    <button id="deleteFiles" onclick="deleteSelectedFiles()" class="delete">Delete Selected Files</button>
                 </div>
                 
                 <div id="fileList"></div>
@@ -291,7 +291,7 @@
                 <div class="form-group">
                     <input type="file" id="fileUpload">
                 </div>
-                <button id="uploadFile">Upload File</button>
+                <button id="uploadFile" onclick="uploadFile()">Upload File</button>
             </div>
         </div>
     </div>
@@ -498,15 +498,13 @@
                     
                     // Add event listeners for buttons
                     document.querySelectorAll('.set-active-btn').forEach(btn => {
-                        btn.addEventListener('click', (e) => {
-                            setAsActiveVectorStore(e.target.dataset.id);
-                        });
+                        btn.dataset.onclick = `setAsActiveVectorStore('${btn.dataset.id}')`;
+                        btn.setAttribute('onclick', `setAsActiveVectorStore('${btn.dataset.id}')`);
                     });
                     
                     document.querySelectorAll('.delete-store-btn').forEach(btn => {
-                        btn.addEventListener('click', (e) => {
-                            deleteVectorStore(e.target.dataset.id);
-                        });
+                        btn.dataset.onclick = `deleteVectorStore('${btn.dataset.id}')`;
+                        btn.setAttribute('onclick', `deleteVectorStore('${btn.dataset.id}')`);
                     });
                 } else {
                     listEl.innerHTML = '<p>No vector stores found.</p>';
@@ -771,10 +769,11 @@
             }
         }
         
-        // Upload file to vector store
+        // Fix the uploadFile function in admin.html
         async function uploadFile() {
-            if (!selectedStoreId) {
-                showMessage('No vector store selected', true);
+            // Use activeVectorStoreId instead of selectedStoreId
+            if (!activeVectorStoreId) {
+                showMessage('No active vector store selected', true);
                 return;
             }
             
@@ -792,7 +791,8 @@
                 // Show loading message
                 showMessage('Uploading file... This may take a while for large files.', false);
                 
-                const response = await fetch(`/storage-admin/vector-stores/${selectedStoreId}/files`, {
+                // Use activeVectorStoreId instead of selectedStoreId in the URL
+                const response = await fetch(`/storage-admin/vector-stores/${activeVectorStoreId}/files`, {
                     method: 'POST',
                     body: formData
                 });
@@ -807,15 +807,15 @@
                 // Clear file input
                 fileInput.value = '';
                 
-                // Refresh files
-                await loadFiles(selectedStoreId);
+                // Refresh files for the active vector store
+                await loadFiles(activeVectorStoreId);
             } catch (error) {
                 console.error('Error uploading file:', error);
                 showMessage('Failed to upload file: ' + error.message, true);
             }
         }
         
-        // Delete selected files
+        // Fix the deleteSelectedFiles function in admin.html
         async function deleteSelectedFiles() {
             const selectedFileIds = Array.from(document.querySelectorAll('.file-checkbox:checked'))
                 .map(checkbox => checkbox.dataset.id);
@@ -837,7 +837,7 @@
                     },
                     body: JSON.stringify({
                         file_ids: selectedFileIds,
-                        vector_store_id: selectedStoreId
+                        vector_store_id: activeVectorStoreId  // Use activeVectorStoreId here
                     })
                 });
                 
@@ -852,7 +852,7 @@
                 document.getElementById('fileDetailsSection').classList.add('hidden');
                 
                 // Refresh files
-                await loadFiles(selectedStoreId);
+                await loadFiles(activeVectorStoreId);  // Use activeVectorStoreId here
             } catch (error) {
                 console.error('Error deleting files:', error);
                 showMessage('Failed to delete files: ' + error.message, true);
@@ -865,18 +865,10 @@
             loadConfig();
             loadVectorStores();
             
-            // Set up event listeners
-            document.getElementById('saveConfigButton').addEventListener('click', saveConfig);
-            document.getElementById('refreshStores').addEventListener('click', loadVectorStores);
-            document.getElementById('createStore').addEventListener('click', createVectorStore);
-            document.getElementById('deleteStore').addEventListener('click', deleteVectorStore);
-            document.getElementById('refreshFiles').addEventListener('click', () => {
-                if (selectedStoreId) {
-                    loadFiles(selectedStoreId);
-                }
-            });
-            document.getElementById('deleteFiles').addEventListener('click', deleteSelectedFiles);
-            document.getElementById('uploadFile').addEventListener('click', uploadFile);
+            // Update file management tab with current active store
+            if (activeVectorStoreId) {
+                updateFileManagementTab();
+            }
         });
     </script>
 </body>
