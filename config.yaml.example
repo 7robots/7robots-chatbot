@@ -1,4 +1,6 @@
 # OpenAI API credentials and configuration
+assistant:
+  name: My Assistant
 openai:
   api_key: your_openai_api_key_here
   vector_store_id: your_vector_store_id_here
