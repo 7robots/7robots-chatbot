@@ -208,6 +208,28 @@
             opacity: 0.8;
             cursor: default;
         }
+        .file-details-row {
+            background-color: #f9f9f9;
+        }
+
+        .file-details-row.hidden {
+            display: none;
+        }
+
+        .file-details-cell {
+            padding: 0 !important;
+        }
+
+        .inline-details-panel {
+            padding: 15px;
+            border-top: 1px solid #ddd;
+            border-bottom: 1px solid #ddd;
+            background-color: #f9f9f9;
+        }
+
+        .files-table tr.file-row:hover + tr.file-details-row:not(.hidden) {
+            background-color: #f9f9f9;
+        }
     </style>
 </head>
 <body>
@@ -657,6 +679,7 @@
                     // Create a table for better formatting
                     const table = document.createElement('table');
                     table.className = 'files-table';
+                    table.id = 'filesTable';
                     
                     // Add table header
                     const thead = document.createElement('thead');
@@ -671,10 +694,13 @@
                     
                     // Create table body
                     const tbody = document.createElement('tbody');
+                    tbody.id = 'filesTableBody';
                     
                     data.files.forEach(file => {
+                        // Create the file row
                         const tr = document.createElement('tr');
                         tr.className = 'file-row';
+                        tr.id = `file-row-${file.id}`;
                         
                         tr.innerHTML = `
                             <td>
@@ -687,6 +713,17 @@
                         `;
                         
                         tbody.appendChild(tr);
+                        
+                        // Create a hidden details row that will appear below this file
+                        const detailsRow = document.createElement('tr');
+                        detailsRow.id = `file-details-${file.id}`;
+                        detailsRow.className = 'file-details-row hidden';
+                        detailsRow.innerHTML = `
+                            <td colspan="3" class="file-details-cell">
+                                <div id="details-content-${file.id}" class="file-details-content"></div>
+                            </td>
+                        `;
+                        tbody.appendChild(detailsRow);
                     });
                     
                     table.appendChild(tbody);
@@ -697,7 +734,7 @@
                 
                 selectedStoreFiles = data.files || [];
                 
-                // Hide file details if showing
+                // Hide the standalone file details section since we're using inline details
                 document.getElementById('fileDetailsSection').classList.add('hidden');
             } catch (error) {
                 console.error('Error loading files:', error);
@@ -706,15 +743,32 @@
                 showMessage('Failed to load files: ' + error.message, true);
             }
         }
-        
+
         // Get file details
         async function getFileDetails(fileId) {
             try {
-                // Show loading indicator
-                const detailsSection = document.getElementById('fileDetailsSection');
-                detailsSection.innerHTML = '<p><i>Loading file details...</i></p>';
-                detailsSection.classList.remove('hidden');
+                // Get the details row for this file
+                const detailsRow = document.getElementById(`file-details-${fileId}`);
                 
+                // If this row is already visible, just hide it (toggle behavior)
+                if (!detailsRow.classList.contains('hidden')) {
+                    detailsRow.classList.add('hidden');
+                    return;
+                }
+                
+                // Hide any other currently visible details rows
+                document.querySelectorAll('.file-details-row').forEach(row => {
+                    row.classList.add('hidden');
+                });
+                
+                // Get the details content container
+                const detailsContent = document.getElementById(`details-content-${fileId}`);
+                
+                // Show loading indicator in the row
+                detailsContent.innerHTML = '<p><i>Loading file details...</i></p>';
+                detailsRow.classList.remove('hidden');
+                
+                // Fetch the file details
                 const response = await fetch(`/storage-admin/files/${fileId}`);
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
@@ -736,53 +790,60 @@
                 }
                 
                 // Display file details
-                detailsSection.innerHTML = `
-                    <h3>File Details</h3>
-                    <table class="details-table">
-                        <tr>
-                            <td class="property-name">File ID:</td>
-                            <td>${fileDetails.id}</td>
-                        </tr>
-                        <tr>
-                            <td class="property-name">Filename:</td>
-                            <td>${fileDetails.filename || 'Unknown'}</td>
-                        </tr>
-                        <tr>
-                            <td class="property-name">File Size:</td>
-                            <td>${sizeStr}</td>
-                        </tr>
-                        <tr>
-                            <td class="property-name">Created Date:</td>
-                            <td>${dateStr}</td>
-                        </tr>
-                        <tr>
-                            <td class="property-name">Status:</td>
-                            <td>${fileDetails.status || 'Unknown'}</td>
-                        </tr>
-                        <tr>
-                            <td class="property-name">Purpose:</td>
-                            <td>${fileDetails.purpose || 'Unknown'}</td>
-                        </tr>
-                        <tr>
-                            <td class="property-name">Format:</td>
-                            <td>${fileDetails.format || 'Unknown'}</td>
-                        </tr>
-                    </table>
-                    <button onclick="closeFileDetails()" class="secondary">Close Details</button>
+                detailsContent.innerHTML = `
+                    <div class="inline-details-panel">
+                        <h3>File Details</h3>
+                        <table class="details-table">
+                            <tr>
+                                <td class="property-name">File ID:</td>
+                                <td>${fileDetails.id}</td>
+                            </tr>
+                            <tr>
+                                <td class="property-name">Filename:</td>
+                                <td>${fileDetails.filename || 'Unknown'}</td>
+                            </tr>
+                            <tr>
+                                <td class="property-name">File Size:</td>
+                                <td>${sizeStr}</td>
+                            </tr>
+                            <tr>
+                                <td class="property-name">Created Date:</td>
+                                <td>${dateStr}</td>
+                            </tr>
+                            <tr>
+                                <td class="property-name">Status:</td>
+                                <td>${fileDetails.status || 'Unknown'}</td>
+                            </tr>
+                            <tr>
+                                <td class="property-name">Purpose:</td>
+                                <td>${fileDetails.purpose || 'Unknown'}</td>
+                            </tr>
+                            <tr>
+                                <td class="property-name">Format:</td>
+                                <td>${fileDetails.format || 'Unknown'}</td>
+                            </tr>
+                        </table>
+                        <button onclick="closeInlineFileDetails('${fileId}')" class="secondary">Close Details</button>
+                    </div>
                 `;
             } catch (error) {
                 console.error('Error getting file details:', error);
-                document.getElementById('fileDetailsSection').innerHTML = 
-                    `<p class="error">Failed to load file details: ${error.message}</p>
-                    <button onclick="closeFileDetails()" class="secondary">Close</button>`;
+                document.getElementById(`details-content-${fileId}`).innerHTML = 
+                    `<div class="inline-details-panel">
+                        <p class="error">Failed to load file details: ${error.message}</p>
+                        <button onclick="closeInlineFileDetails('${fileId}')" class="secondary">Close</button>
+                    </div>`;
                 
                 showMessage('Failed to load file details: ' + error.message, true);
             }
         }
-        
-        // Close file details panel
-        function closeFileDetails() {
-            document.getElementById('fileDetailsSection').classList.add('hidden');
+
+        // Add this new function to close inline file details
+        function closeInlineFileDetails(fileId) {
+            const detailsRow = document.getElementById(`file-details-${fileId}`);
+            if (detailsRow) {
+                detailsRow.classList.add('hidden');
+            }
         }
         
         // Upload file
