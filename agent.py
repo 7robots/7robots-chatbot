@@ -129,7 +129,7 @@ async def upload_file(vector_store_id: str, file: UploadFile = File(...)):
         with open(temp_file_path, "rb") as f:
             response = client.vector_stores.files.create(
                 vector_store_id=vector_store_id,
-                file=f
+                file_id=f
             )
             
         # Clean up the temporary file
