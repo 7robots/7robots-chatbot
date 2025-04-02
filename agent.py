@@ -19,8 +19,36 @@ from agents import set_default_openai_key
 
 # Load configuration from config.yaml
 def load_config():
-    with open("config.yaml", "r") as config_file:
-        return yaml.safe_load(config_file)
+    config_path = "config.yaml"
+    
+    # Create default config if it doesn't exist
+    if not os.path.exists(config_path):
+        default_config = {
+            "openai": {
+                "api_key": "",
+                "vector_store_id": ""
+            },
+            "assistant": {
+                "name": "AI Assistant"
+            }
+        }
+        with open(config_path, "w") as file:
+            yaml.dump(default_config, file)
+        return default_config
+    
+    # Load existing config
+    with open(config_path, "r") as file:
+        config = yaml.safe_load(file) or {}
+        
+    # Ensure assistant section exists
+    if "assistant" not in config:
+        config["assistant"] = {
+            "name": "AI Assistant"
+        }
+        with open(config_path, "w") as file:
+            yaml.dump(config, file)
+    
+    return config
 
 config = load_config()
 
@@ -34,12 +62,16 @@ client = OpenAI(api_key=OPENAI_API_KEY)
 
 # Initialize the OpenAI agent
 def create_agent(vector_store_id):
+    # Get assistant name from config
+    config = load_config()
+    assistant_name = config.get("assistant", {}).get("name", "AI Assistant")
+    
     return Agent(
-        name="Document Retrieval agent",
-        instructions="You only answer questions about the data and files from the file search tool",
+        name=assistant_name,
+        instructions="You only answer questions about D&D with data from the file search tool",
         tools=[
             FileSearchTool(
-                max_num_results=50,
+                max_num_results=30,
                 vector_store_ids=[vector_store_id],
             ),
         ]
@@ -74,6 +106,9 @@ class ApiKeyRequest(BaseModel):
 
 class VectorStoreIdRequest(BaseModel):
     vector_store_id: str
+
+class AssistantNameRequest(BaseModel):
+    assistant_name: str
 
 # ==========================================================
 # Basic Navigation Endpoints
@@ -112,9 +147,14 @@ async def get_config():
         api_key = OPENAI_API_KEY
         masked_key = "•" * (len(api_key) - 8) + api_key[-8:] if api_key else ""
         
+        # Get assistant name from config
+        config = load_config()
+        assistant_name = config.get("assistant", {}).get("name", "AI Assistant")
+        
         return {
             "api_key": masked_key,
-            "vector_store_id": VECTOR_STORE_ID
+            "vector_store_id": VECTOR_STORE_ID,
+            "assistant_name": assistant_name
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -183,6 +223,31 @@ async def update_vector_store_id(request: VectorStoreIdRequest):
         doc_agent = create_agent(VECTOR_STORE_ID)
         
         return {"status": "success", "message": "Vector store ID updated successfully"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/storage-admin/config/assistant-name")
+async def update_assistant_name(request: AssistantNameRequest):
+    try:
+        # Update the config file
+        config_path = "config.yaml"
+        
+        # Read existing config
+        with open(config_path, "r") as file:
+            config = yaml.safe_load(file) or {}
+            
+        # Make sure we have the assistant section
+        if "assistant" not in config:
+            config["assistant"] = {}
+            
+        # Update the assistant name
+        config["assistant"]["name"] = request.assistant_name
+        
+        # Save the updated config
+        with open(config_path, "w") as file:
+            yaml.dump(config, file)
+        
+        return {"status": "success", "message": "Assistant name updated successfully"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

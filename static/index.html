@@ -101,7 +101,9 @@
 </head>
 <body>
     <header>
-        <h1>Chat with GPT-4o</h1>
+        <div class="chat-header">
+            <h1 class="chat-title">AI Assistant</h1>
+        </div>
     </header>
     <main>
         <form id="chatForm" onsubmit="sendMessage(event)">
@@ -184,6 +186,29 @@
             if (event.key === 'Enter' && event.ctrlKey) {
                 sendMessage();
             }
+        });
+
+        async function loadAssistantConfig() {
+            try {
+                const response = await fetch('/storage-admin/config');
+                if (response.ok) {
+                    const config = await response.json();
+                    if (config.assistant_name) {
+                        // Update the chat title with assistant name
+                        document.querySelector('.chat-title').textContent = config.assistant_name;
+                        // Update the page title
+                        document.title = config.assistant_name + ' - Chat';
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading assistant configuration:', error);
+            }
+        }
+
+        // Call this on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            loadAssistantConfig();
+            // ... other initialization code
         });
     </script>
 </body>

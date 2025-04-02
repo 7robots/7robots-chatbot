@@ -265,6 +265,14 @@
                 <p><strong>Note:</strong> Changes to the API key will take effect immediately for new requests.</p>
             </div>
             
+            <h2>Assistant Configuration</h2>
+            <div class="form-group">
+                <label for="assistantName">Assistant Name:</label>
+                <input type="text" id="assistantName" placeholder="Enter assistant name (e.g., D&D Helper)">
+                <small>This name will be displayed in the chat interface.</small>
+            </div>
+            <button onclick="saveAssistantName()">Save Assistant Name</button>
+            
             <!-- Vector Store Management Section -->
             <h2>Vector Store Management</h2>
             <button onclick="loadVectorStores()" class="secondary">Refresh Vector Store List</button>
@@ -388,6 +396,10 @@
                     // Update file management tab
                     updateFileManagementTab();
                 }
+                // Add this new section for assistant name
+                if (config.assistant_name) {
+                    document.getElementById('assistantName').placeholder = config.assistant_name;
+                }
             } catch (error) {
                 console.error('Error loading configuration:', error);
                 showMessage('Failed to load configuration: ' + error.message, true);
@@ -433,6 +445,44 @@
             }
         }
         
+        // Add this to the API Configuration Functions section
+        async function saveAssistantName() {
+            const assistantName = document.getElementById('assistantName').value.trim();
+            
+            // Validate input
+            if (!assistantName) {
+                showMessage('Please enter an assistant name', true);
+                return;
+            }
+            
+            try {
+                const response = await fetch('/storage-admin/config/assistant-name', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        assistant_name: assistantName
+                    })
+                });
+                
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.detail || 'Failed to update assistant name');
+                }
+                
+                showMessage('Assistant name updated successfully!');
+                
+                // Clear input field and update placeholder
+                document.getElementById('assistantName').placeholder = assistantName;
+                document.getElementById('assistantName').value = '';
+                
+            } catch (error) {
+                console.error('Error saving assistant name:', error);
+                showMessage('Failed to save assistant name: ' + error.message, true);
+            }
+        }
+
         // ----- Vector Store Functions -----
         
         // Update file management tab based on active vector store
