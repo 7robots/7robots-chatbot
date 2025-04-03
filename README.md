@@ -1,30 +1,32 @@
 # 7robots-chatbot
  
-# Clone the repository from GitHub
-git clone https://github.com/yourusername/7robots-chatbot.git
+## Software Installation
 
-# Navigate to the project directory
+
+
+
+1. Clone the repository:
+
+```bash
+git clone https://github.com/7robots/7robots-chatbot.git
 cd 7robots-chatbot
+```
 
-# Create a virtual environment
+2. Setup virtual environment:
+
+```bash
 python -m venv venv
-
-# Activate the virtual environment
-
-# On macOS/Linux:
 source venv/bin/activate
+```
 
-# On Windows:
-# venv\Scripts\activate
 
-# Install required packages
+3. Install required packages and stage configuration file
+```bash
 pip install -r requirements.txt
+mv config.yaml.example config.yaml
+```
 
-# If requirements.txt doesn't exist, install the core dependencies:
-pip install fastapi uvicorn openai python-dotenv pyyaml
-
-# Create the configuration file
-cp config.yaml.example config.yaml
+## Initial Configuration
 
 ## Optional: if you have already know your OpenAI API key and your Vector Store ID, you can add them here. Otherwise, you can do it later via the admin web page. Edit config.yaml and add your keys.
 openai:
@@ -38,8 +40,6 @@ fastapi run agent.py
 ## Admin Page
 Admin Panel: http://localhost:8000/admin
 
-## File Management: if you want to jump straight to the file management interface, see below. It is also linked from the Admin page.
-File Management: http://localhost:8000/files
 
 ## Accessing the Chat application: 
 
