@@ -4,7 +4,7 @@ __pycache__/
 *.py[cod]
 *$py.class
 
-# Configuration files
+# Configuration files (don't sync your production config.yaml with API key in it)
 config.yaml
 
 # macOS system files
@@ -12,3 +12,6 @@ config.yaml
 
 # Git files
 .gitattributes
+
+# venv (in case you build your project inside your local git repo)
+venv/

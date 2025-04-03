@@ -1,8 +1,23 @@
 # 7robots-chatbot
  
+ ## Overview
+
+ This software can be used to serve an AI Chatbot interface to provide answers about your documents. It leverages OpenAI's new Agents framework to provide the GAI back-end. Similarly, it also leverages vector storage provided by the OpenAI to store your documents.
+
+ ## Prerequisites
+
+ - an OpenAI API key and credits on the OpenAI platform for both API usage and storage.
+ - Python 3.11 or higher
+ - Pip (to install software dependencies)
+
+## OpenAI considerations
+
+- this project only works with OpenAI directly. A future release may add the ability to use custom endpoints (like Azure).
+- This project's admin interface will be able to add/modify/delete all vector stores accessible by your API key
+- As such, you should consider creating a new project in the OpenAI platform, creating a project API key within that project, and only leverage vector stores inside that project.
+- You should be able to create and manage your vector store in either the OpenAI platform or via this chatbot's admin interface.
+
 ## Software Installation
-
-
 
 
 1. Clone the repository:
@@ -23,12 +38,22 @@ source venv/bin/activate
 3. Install required packages and stage configuration file
 ```bash
 pip install -r requirements.txt
-mv config.yaml.example config.yaml
+cp config.yaml.example config.yaml
 ```
 
 ## Initial Configuration
 
-## Optional: if you have already know your OpenAI API key and your Vector Store ID, you can add them here. Otherwise, you can do it later via the admin web page. Edit config.yaml and add your keys.
+Edit config.yaml to:
+
+- add your OpenAI key
+- add your vector storage ID if you already know it (if not, you'll be able to discover it or create a new one via the admin interface)
+- name your chatbot
+
+(note: all three of these functions can also be done via the admin web interface, but it's probably easier to do them in the config.yaml file before you start the service. Should you need to change any of these three settings, the chatbot application will automatically load the settings without the need to stop/start again)
+
+
+assistant:
+  name: My Assistant
 openai:
   api_key: your_openai_api_key_here
   vector_store_id: your_vector_store_id_here
