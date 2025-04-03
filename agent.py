@@ -68,7 +68,7 @@ def create_agent(vector_store_id):
     
     return Agent(
         name=assistant_name,
-        instructions="You only answer questions about D&D with data from the file search tool",
+        instructions="You are a knowledgeable assistant that only answer questions from the files contained in the file search tool",
         tools=[
             FileSearchTool(
                 max_num_results=30,
