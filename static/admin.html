@@ -18,7 +18,7 @@
             --light-color: #f8fafc;
             --gray-color: #94a3b8;
             --light-gray: #e2e8f0;
-            --sidebar-width: 280px;
+            --sidebar-width: 320px; /* Increased from 280px */
             --border-radius: 8px;
             --box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
             --transition: all 0.3s ease;
@@ -100,8 +100,8 @@
 
         .sidebar-section {
             padding: 0 20px 20px;
-            border-bottom: 1px solid var(--light-gray);
-            margin-bottom: 20px;
+            border-bottom: 2px solid var(--light-gray); /* Thicker border */
+            margin-bottom: 25px; /* More space between sections */
         }
 
         .sidebar-section:last-child {
@@ -109,12 +109,14 @@
         }
 
         .sidebar-section-title {
-            font-size: 1rem;
+            font-size: 0.9rem;
             font-weight: 600;
             color: var(--gray-color);
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            margin-bottom: 15px;
+            margin-bottom: 18px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--light-gray); /* Add underline */
         }
 
         /* Main content */
@@ -125,7 +127,7 @@
 
         /* Form elements */
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 25px; /* More space between form elements */
         }
 
         label {
@@ -166,9 +168,10 @@
         .active-store-indicator {
             background-color: #ecfdf5;
             border-left: 4px solid var(--success-color);
-            padding: 15px;
-            margin-bottom: 20px;
+            padding: 18px; /* More padding */
+            margin-bottom: 25px; /* More space after */
             border-radius: var(--border-radius);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05); /* Subtle shadow */
         }
 
         /* Buttons */
@@ -184,8 +187,8 @@
             cursor: pointer;
             transition: var(--transition);
             text-decoration: none;
-            margin-right: 10px;
-            margin-bottom: 10px;
+            margin-right: 12px;
+            margin-bottom: 12px;
         }
 
         .btn-block {
@@ -248,13 +251,14 @@
             background-color: white;
             border-radius: var(--border-radius);
             box-shadow: var(--box-shadow);
-            margin-bottom: 20px;
+            margin-bottom: 30px; /* More space between cards */
             overflow: hidden;
+            border: none; /* Remove default border to reduce visual noise */
         }
 
         .card-header {
-            padding: 15px 20px;
-            border-bottom: 1px solid var(--light-gray);
+            padding: 18px 20px; /* More vertical padding */
+            border-bottom: 2px solid var(--light-gray); /* Thicker border */
             background-color: #fafafa;
             display: flex;
             justify-content: space-between;
@@ -271,11 +275,12 @@
 
         /* Alert/Message styles */
         .alert {
-            padding: 15px 20px;
+            padding: 16px 20px;
             border-radius: var(--border-radius);
-            margin-bottom: 20px;
+            margin-bottom: 25px;
             display: flex;
             align-items: flex-start;
+            border-width: 0 0 0 4px; /* Only left border, make it thicker */
         }
 
         .alert i {
@@ -324,15 +329,16 @@
 
         .table th,
         .table td {
-            padding: 12px 15px;
+            padding: 14px 15px; /* More padding for breathing room */
             text-align: left;
             border-bottom: 1px solid var(--light-gray);
         }
 
         .table th {
-            background-color: #f8fafc;
+            background-color: #f0f5ff; /* Match the page background for better contrast */
             font-weight: 600;
             color: var(--dark-color);
+            border-bottom: 2px solid var(--light-gray); /* Thicker border for header */
         }
 
         .table tr:last-child td {
@@ -405,13 +411,14 @@
         }
 
         .store-item {
-            padding: 12px;
+            padding: 15px; /* More padding */
             border: 1px solid var(--light-gray);
             border-radius: var(--border-radius);
-            margin-bottom: 10px;
+            margin-bottom: 12px;
             background-color: white;
             cursor: pointer;
             transition: var(--transition);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05); /* Subtle shadow for depth */
         }
 
         .store-item:hover {
