@@ -1,4 +1,3 @@
-/admin.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -30,21 +29,21 @@
             border-bottom: 1px solid #ddd;
         }
         .tab-button {
-            background-color: #e0e0e0; /* Darker gray background */
+            background-color: #e0e0e0;
             border: none;
             padding: 12px 24px;
             cursor: pointer;
             font-size: 16px;
             transition: 0.3s;
-            color: #333; /* Darker text for better readability */
+            color: #333;
             border-top-left-radius: 4px;
             border-top-right-radius: 4px;
             margin-right: 2px;
-            font-weight: 500; /* Make the text slightly bolder */
+            font-weight: 500;
         }
         
         .tab-button:hover {
-            background-color: #ccc; /* Even darker on hover */
+            background-color: #ccc;
         }
         
         .tab-button.active {
@@ -199,16 +198,36 @@
             align-items: center;
             margin-bottom: 20px;
         }
-        /* Add these styles for vector store management */
         .active-store {
-            background-color: #e8f5e9; /* Light green background */
+            background-color: #e8f5e9;
         }
-
         .set-active-btn[disabled] {
-            background-color: #4CAF50; /* Green for current active store */
+            background-color: #4CAF50;
             color: white;
             opacity: 0.8;
             cursor: default;
+        }
+        .file-details-row {
+            background-color: #f9f9f9;
+        }
+
+        .file-details-row.hidden {
+            display: none;
+        }
+
+        .file-details-cell {
+            padding: 0 !important;
+        }
+
+        .inline-details-panel {
+            padding: 15px;
+            border-top: 1px solid #ddd;
+            border-bottom: 1px solid #ddd;
+            background-color: #f9f9f9;
+        }
+
+        .files-table tr.file-row:hover + tr.file-details-row:not(.hidden) {
+            background-color: #f9f9f9;
         }
     </style>
 </head>
@@ -240,15 +259,23 @@
                 <input type="password" id="apiKey" placeholder="Enter your OpenAI API key" autocomplete="off">
                 <small>Your OpenAI API key is stored in the config.yaml file.</small>
             </div>
-            <button id="saveConfigButton" onclick="saveConfig()">Save API Key</button>
+            <button onclick="saveConfig()">Save API Key</button>
             
             <div class="info-box" style="margin-top: 20px; background-color: #fff3cd; color: #856404;">
                 <p><strong>Note:</strong> Changes to the API key will take effect immediately for new requests.</p>
             </div>
             
+            <h2>Assistant Configuration</h2>
+            <div class="form-group">
+                <label for="assistantName">Assistant Name:</label>
+                <input type="text" id="assistantName" placeholder="Enter assistant name (e.g., D&D Helper)">
+                <small>This name will be displayed in the chat interface.</small>
+            </div>
+            <button onclick="saveAssistantName()">Save Assistant Name</button>
+            
             <!-- Vector Store Management Section -->
             <h2>Vector Store Management</h2>
-            <button id="refreshStores" onclick="loadVectorStores()" class="secondary">Refresh Vector Store List</button>
+            <button onclick="loadVectorStores()" class="secondary">Refresh Vector Store List</button>
             
             <div class="form-group" style="margin-top: 15px;">
                 <label for="vectorStoreId">Current Active Vector Store:</label>
@@ -264,7 +291,7 @@
             <div class="form-group">
                 <textarea id="newStoreDescription" placeholder="Description (optional)"></textarea>
             </div>
-            <button id="createStore" onclick="createVectorStore()">Create Vector Store</button>
+            <button onclick="createVectorStore()">Create Vector Store</button>
         </div>
         
         <!-- File Management Tab -->
@@ -280,8 +307,8 @@
             
             <div id="fileManagementContainer" class="hidden">
                 <div class="file-actions">
-                    <button id="refreshFiles" onclick="loadFiles(activeVectorStoreId)" class="secondary">Refresh Files</button>
-                    <button id="deleteFiles" onclick="deleteSelectedFiles()" class="delete">Delete Selected Files</button>
+                    <button onclick="loadFiles(activeVectorStoreId)" class="secondary">Refresh Files</button>
+                    <button onclick="deleteSelectedFiles()" class="delete">Delete Selected Files</button>
                 </div>
                 
                 <div id="fileList"></div>
@@ -291,16 +318,17 @@
                 <div class="form-group">
                     <input type="file" id="fileUpload">
                 </div>
-                <button id="uploadFile" onclick="uploadFile()">Upload File</button>
+                <button onclick="uploadFile()">Upload File</button>
             </div>
         </div>
     </div>
     
     <script>
         // Global variables
-        let selectedStoreId = null;
-        let selectedStoreFiles = [];
         let activeVectorStoreId = null;
+        let selectedStoreFiles = [];
+        
+        // ----- Helper Functions -----
         
         // Tab functionality
         function openTab(evt, tabName) {
@@ -321,7 +349,7 @@
             evt.currentTarget.classList.add("active");
         }
         
-        // Helper functions
+        // Show temporary message
         function showMessage(text, isError = false) {
             const messageEl = document.getElementById('message');
             messageEl.textContent = text;
@@ -368,6 +396,10 @@
                     // Update file management tab
                     updateFileManagementTab();
                 }
+                // Add this new section for assistant name
+                if (config.assistant_name) {
+                    document.getElementById('assistantName').placeholder = config.assistant_name;
+                }
             } catch (error) {
                 console.error('Error loading configuration:', error);
                 showMessage('Failed to load configuration: ' + error.message, true);
@@ -400,7 +432,6 @@
                     throw new Error(error.detail || 'Failed to update configuration');
                 }
                 
-                const result = await response.json();
                 showMessage('API key updated successfully!');
                 
                 // Clear input field
@@ -414,7 +445,47 @@
             }
         }
         
-        // Function to update file management tab based on active vector store
+        // Add this to the API Configuration Functions section
+        async function saveAssistantName() {
+            const assistantName = document.getElementById('assistantName').value.trim();
+            
+            // Validate input
+            if (!assistantName) {
+                showMessage('Please enter an assistant name', true);
+                return;
+            }
+            
+            try {
+                const response = await fetch('/storage-admin/config/assistant-name', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        assistant_name: assistantName
+                    })
+                });
+                
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.detail || 'Failed to update assistant name');
+                }
+                
+                showMessage('Assistant name updated successfully!');
+                
+                // Clear input field and update placeholder
+                document.getElementById('assistantName').placeholder = assistantName;
+                document.getElementById('assistantName').value = '';
+                
+            } catch (error) {
+                console.error('Error saving assistant name:', error);
+                showMessage('Failed to save assistant name: ' + error.message, true);
+            }
+        }
+
+        // ----- Vector Store Functions -----
+        
+        // Update file management tab based on active vector store
         function updateFileManagementTab() {
             const noWarning = document.getElementById('noVectorStoreWarning');
             const fileContainer = document.getElementById('fileManagementContainer');
@@ -441,7 +512,7 @@
             }
         }
         
-        // Update vector stores loading to include set-as-active button
+        // Load vector stores
         async function loadVectorStores() {
             try {
                 const response = await fetch('/storage-admin/vector-stores');
@@ -482,11 +553,11 @@
                             <td><strong>${store.name}</strong></td>
                             <td><small>${store.id}</small></td>
                             <td>
-                                <button class="set-active-btn secondary" data-id="${store.id}" 
+                                <button onclick="setAsActiveVectorStore('${store.id}')" class="secondary" 
                                     ${store.id === activeVectorStoreId ? 'disabled' : ''}>
                                     ${store.id === activeVectorStoreId ? 'Current Active Store' : 'Set as Active'}
                                 </button>
-                                <button class="delete-store-btn delete" data-id="${store.id}">Delete</button>
+                                <button onclick="deleteVectorStore('${store.id}')" class="delete">Delete</button>
                             </td>
                         `;
                         
@@ -495,17 +566,6 @@
                     
                     table.appendChild(tbody);
                     listEl.appendChild(table);
-                    
-                    // Add event listeners for buttons
-                    document.querySelectorAll('.set-active-btn').forEach(btn => {
-                        btn.dataset.onclick = `setAsActiveVectorStore('${btn.dataset.id}')`;
-                        btn.setAttribute('onclick', `setAsActiveVectorStore('${btn.dataset.id}')`);
-                    });
-                    
-                    document.querySelectorAll('.delete-store-btn').forEach(btn => {
-                        btn.dataset.onclick = `deleteVectorStore('${btn.dataset.id}')`;
-                        btn.setAttribute('onclick', `deleteVectorStore('${btn.dataset.id}')`);
-                    });
                 } else {
                     listEl.innerHTML = '<p>No vector stores found.</p>';
                 }
@@ -515,7 +575,48 @@
             }
         }
         
-        // Function to set as active vector store
+        // Create new vector store
+        async function createVectorStore() {
+            const name = document.getElementById('newStoreName').value.trim();
+            const description = document.getElementById('newStoreDescription').value.trim();
+            
+            if (!name) {
+                showMessage('Please enter a name for the vector store', true);
+                return;
+            }
+            
+            try {
+                const response = await fetch('/storage-admin/vector-stores', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        name,
+                        description: description || undefined
+                    })
+                });
+                
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.detail || 'Failed to create vector store');
+                }
+                
+                showMessage(`Vector store "${name}" created successfully!`);
+                
+                // Clear input fields
+                document.getElementById('newStoreName').value = '';
+                document.getElementById('newStoreDescription').value = '';
+                
+                // Refresh the list
+                await loadVectorStores();
+            } catch (error) {
+                console.error('Error creating vector store:', error);
+                showMessage('Failed to create vector store: ' + error.message, true);
+            }
+        }
+        
+        // Set as active vector store
         async function setAsActiveVectorStore(storeId) {
             if (!storeId) {
                 showMessage('Invalid vector store selected', true);
@@ -529,8 +630,6 @@
                     return;
                 }
                 
-                // Here we need to create an endpoint in agent.py to update the active vector store
-                // For now, we'll just update the config.yaml file with the existing API endpoint
                 const response = await fetch('/storage-admin/config/vector-store', {
                     method: 'POST',
                     headers: {
@@ -546,7 +645,6 @@
                     throw new Error(error.detail || 'Failed to update active vector store');
                 }
                 
-                const result = await response.json();
                 showMessage(`Vector store set as active successfully!`);
                 
                 // Update the global variable
@@ -566,7 +664,7 @@
             }
         }
         
-        // Update delete vector store function
+        // Delete vector store
         async function deleteVectorStore(storeId) {
             if (!storeId) {
                 showMessage('No vector store selected', true);
@@ -608,6 +706,10 @@
         
         // Load files for a vector store
         async function loadFiles(storeId) {
+            if (!storeId) {
+                return;
+            }
+            
             try {
                 // Show loading indicator
                 const listEl = document.getElementById('fileList');
@@ -619,7 +721,6 @@
                 }
                 
                 const data = await response.json();
-                console.log("Files data:", data);
                 
                 listEl.innerHTML = '';
                 
@@ -627,6 +728,7 @@
                     // Create a table for better formatting
                     const table = document.createElement('table');
                     table.className = 'files-table';
+                    table.id = 'filesTable';
                     
                     // Add table header
                     const thead = document.createElement('thead');
@@ -641,10 +743,13 @@
                     
                     // Create table body
                     const tbody = document.createElement('tbody');
+                    tbody.id = 'filesTableBody';
                     
                     data.files.forEach(file => {
+                        // Create the file row
                         const tr = document.createElement('tr');
                         tr.className = 'file-row';
+                        tr.id = `file-row-${file.id}`;
                         
                         tr.innerHTML = `
                             <td>
@@ -652,30 +757,33 @@
                             </td>
                             <td>${file.id}</td>
                             <td>
-                                <button class="view-details-btn secondary" data-id="${file.id}">View Details</button>
+                                <button onclick="getFileDetails('${file.id}')" class="secondary">View Details</button>
                             </td>
                         `;
                         
                         tbody.appendChild(tr);
+                        
+                        // Create a hidden details row that will appear below this file
+                        const detailsRow = document.createElement('tr');
+                        detailsRow.id = `file-details-${file.id}`;
+                        detailsRow.className = 'file-details-row hidden';
+                        detailsRow.innerHTML = `
+                            <td colspan="3" class="file-details-cell">
+                                <div id="details-content-${file.id}" class="file-details-content"></div>
+                            </td>
+                        `;
+                        tbody.appendChild(detailsRow);
                     });
                     
                     table.appendChild(tbody);
                     listEl.appendChild(table);
-                    
-                    // Add click handlers for view details buttons
-                    document.querySelectorAll('.view-details-btn').forEach(btn => {
-                        btn.addEventListener('click', () => {
-                            const fileId = btn.dataset.id;
-                            getFileDetails(fileId);
-                        });
-                    });
                 } else {
                     listEl.innerHTML = '<p>No files found in this vector store.</p>';
                 }
                 
                 selectedStoreFiles = data.files || [];
                 
-                // Hide file details if showing
+                // Hide the standalone file details section since we're using inline details
                 document.getElementById('fileDetailsSection').classList.add('hidden');
             } catch (error) {
                 console.error('Error loading files:', error);
@@ -684,22 +792,38 @@
                 showMessage('Failed to load files: ' + error.message, true);
             }
         }
-        
+
         // Get file details
         async function getFileDetails(fileId) {
             try {
-                // Show loading indicator
-                const detailsSection = document.getElementById('fileDetailsSection');
-                detailsSection.innerHTML = '<p><i>Loading file details...</i></p>';
-                detailsSection.classList.remove('hidden');
+                // Get the details row for this file
+                const detailsRow = document.getElementById(`file-details-${fileId}`);
                 
+                // If this row is already visible, just hide it (toggle behavior)
+                if (!detailsRow.classList.contains('hidden')) {
+                    detailsRow.classList.add('hidden');
+                    return;
+                }
+                
+                // Hide any other currently visible details rows
+                document.querySelectorAll('.file-details-row').forEach(row => {
+                    row.classList.add('hidden');
+                });
+                
+                // Get the details content container
+                const detailsContent = document.getElementById(`details-content-${fileId}`);
+                
+                // Show loading indicator in the row
+                detailsContent.innerHTML = '<p><i>Loading file details...</i></p>';
+                detailsRow.classList.remove('hidden');
+                
+                // Fetch the file details
                 const response = await fetch(`/storage-admin/files/${fileId}`);
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
                 
                 const fileDetails = await response.json();
-                console.log("File details:", fileDetails);
                 
                 // Format file size
                 let sizeStr = 'Unknown';
@@ -715,63 +839,64 @@
                 }
                 
                 // Display file details
-                detailsSection.innerHTML = `
-                    <h3>File Details</h3>
-                    <table class="details-table">
-                        <tr>
-                            <td class="property-name">File ID:</td>
-                            <td>${fileDetails.id}</td>
-                        </tr>
-                        <tr>
-                            <td class="property-name">Filename:</td>
-                            <td>${fileDetails.filename || 'Unknown'}</td>
-                        </tr>
-                        <tr>
-                            <td class="property-name">File Size:</td>
-                            <td>${sizeStr}</td>
-                        </tr>
-                        <tr>
-                            <td class="property-name">Created Date:</td>
-                            <td>${dateStr}</td>
-                        </tr>
-                        <tr>
-                            <td class="property-name">Status:</td>
-                            <td>${fileDetails.status || 'Unknown'}</td>
-                        </tr>
-                        <tr>
-                            <td class="property-name">Purpose:</td>
-                            <td>${fileDetails.purpose || 'Unknown'}</td>
-                        </tr>
-                        <tr>
-                            <td class="property-name">Format:</td>
-                            <td>${fileDetails.format || 'Unknown'}</td>
-                        </tr>
-                    </table>
-                    <button id="closeDetails" class="secondary">Close Details</button>
+                detailsContent.innerHTML = `
+                    <div class="inline-details-panel">
+                        <h3>File Details</h3>
+                        <table class="details-table">
+                            <tr>
+                                <td class="property-name">File ID:</td>
+                                <td>${fileDetails.id}</td>
+                            </tr>
+                            <tr>
+                                <td class="property-name">Filename:</td>
+                                <td>${fileDetails.filename || 'Unknown'}</td>
+                            </tr>
+                            <tr>
+                                <td class="property-name">File Size:</td>
+                                <td>${sizeStr}</td>
+                            </tr>
+                            <tr>
+                                <td class="property-name">Created Date:</td>
+                                <td>${dateStr}</td>
+                            </tr>
+                            <tr>
+                                <td class="property-name">Status:</td>
+                                <td>${fileDetails.status || 'Unknown'}</td>
+                            </tr>
+                            <tr>
+                                <td class="property-name">Purpose:</td>
+                                <td>${fileDetails.purpose || 'Unknown'}</td>
+                            </tr>
+                            <tr>
+                                <td class="property-name">Format:</td>
+                                <td>${fileDetails.format || 'Unknown'}</td>
+                            </tr>
+                        </table>
+                        <button onclick="closeInlineFileDetails('${fileId}')" class="secondary">Close Details</button>
+                    </div>
                 `;
-                
-                // Add event listener to close button
-                document.getElementById('closeDetails').addEventListener('click', () => {
-                    detailsSection.classList.add('hidden');
-                });
-                
             } catch (error) {
                 console.error('Error getting file details:', error);
-                document.getElementById('fileDetailsSection').innerHTML = 
-                    `<p class="error">Failed to load file details: ${error.message}</p>
-                    <button id="closeDetails" class="secondary">Close</button>`;
-                
-                document.getElementById('closeDetails').addEventListener('click', () => {
-                    document.getElementById('fileDetailsSection').classList.add('hidden');
-                });
+                document.getElementById(`details-content-${fileId}`).innerHTML = 
+                    `<div class="inline-details-panel">
+                        <p class="error">Failed to load file details: ${error.message}</p>
+                        <button onclick="closeInlineFileDetails('${fileId}')" class="secondary">Close</button>
+                    </div>`;
                 
                 showMessage('Failed to load file details: ' + error.message, true);
             }
         }
+
+        // Add this new function to close inline file details
+        function closeInlineFileDetails(fileId) {
+            const detailsRow = document.getElementById(`file-details-${fileId}`);
+            if (detailsRow) {
+                detailsRow.classList.add('hidden');
+            }
+        }
         
-        // Fix the uploadFile function in admin.html
+        // Upload file
         async function uploadFile() {
-            // Use activeVectorStoreId instead of selectedStoreId
             if (!activeVectorStoreId) {
                 showMessage('No active vector store selected', true);
                 return;
@@ -791,7 +916,6 @@
                 // Show loading message
                 showMessage('Uploading file... This may take a while for large files.', false);
                 
-                // Use activeVectorStoreId instead of selectedStoreId in the URL
                 const response = await fetch(`/storage-admin/vector-stores/${activeVectorStoreId}/files`, {
                     method: 'POST',
                     body: formData
@@ -815,7 +939,7 @@
             }
         }
         
-        // Fix the deleteSelectedFiles function in admin.html
+        // Delete selected files
         async function deleteSelectedFiles() {
             const selectedFileIds = Array.from(document.querySelectorAll('.file-checkbox:checked'))
                 .map(checkbox => checkbox.dataset.id);
@@ -837,7 +961,7 @@
                     },
                     body: JSON.stringify({
                         file_ids: selectedFileIds,
-                        vector_store_id: activeVectorStoreId  // Use activeVectorStoreId here
+                        vector_store_id: activeVectorStoreId
                     })
                 });
                 
@@ -852,23 +976,17 @@
                 document.getElementById('fileDetailsSection').classList.add('hidden');
                 
                 // Refresh files
-                await loadFiles(activeVectorStoreId);  // Use activeVectorStoreId here
+                await loadFiles(activeVectorStoreId);
             } catch (error) {
                 console.error('Error deleting files:', error);
                 showMessage('Failed to delete files: ' + error.message, true);
             }
         }
         
-        // Initialize
+        // Initialize - runs when page loads
         document.addEventListener('DOMContentLoaded', () => {
-            // Load initial data
             loadConfig();
             loadVectorStores();
-            
-            // Update file management tab with current active store
-            if (activeVectorStoreId) {
-                updateFileManagementTab();
-            }
         });
     </script>
 </body>

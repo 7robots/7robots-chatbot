@@ -3,212 +3,353 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OpenAI Chatbot Administration</title>
+    <title>AI Assistant Administration</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-            line-height: 1.6;
+        :root {
+            --primary-color: #4361ee;
+            --primary-light: #4895ef;
+            --primary-dark: #3f37c9;
+            --secondary-color: #00b4d8;
+            --success-color: #4ade80;
+            --danger-color: #f43f5e;
+            --warning-color: #facc15;
+            --dark-color: #1e293b;
+            --light-color: #f8fafc;
+            --gray-color: #94a3b8;
+            --light-gray: #e2e8f0;
+            --sidebar-width: 280px;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --transition: all 0.3s ease;
         }
-        h1, h2, h3 {
-            color: #333;
-        }
-        h1 {
-            border-bottom: 1px solid #ddd;
-            padding-bottom: 10px;
-            margin-bottom: 20px;
-        }
-        .tab-container {
-            margin-bottom: 20px;
-        }
-        .tab-buttons {
-            display: flex;
-            margin-bottom: 20px;
-            border-bottom: 1px solid #ddd;
-        }
-        .tab-button {
-            background-color: #e0e0e0;
-            border: none;
-            padding: 12px 24px;
-            cursor: pointer;
-            font-size: 16px;
-            transition: 0.3s;
-            color: #333;
-            border-top-left-radius: 4px;
-            border-top-right-radius: 4px;
-            margin-right: 2px;
-            font-weight: 500;
-        }
-        
-        .tab-button:hover {
-            background-color: #ccc;
-        }
-        
-        .tab-button.active {
-            background-color: #007bff;
-            color: white;
-            font-weight: 500;
-        }
-        .tab-content {
-            display: none;
-            padding: 15px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-        }
-        .tab-content.active {
-            display: block;
-        }
-        .form-group {
-            margin-bottom: 20px;
-        }
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
-        input[type="text"], 
-        input[type="password"],
-        textarea {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 16px;
+
+        * {
+            margin: 0;
+            padding: 0;
             box-sizing: border-box;
         }
-        button {
-            background-color: #4CAF50;
-            color: white;
-            padding: 10px 15px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 16px;
-            margin-right: 5px;
-            margin-bottom: 5px;
-        }
-        button:hover {
-            background-color: #45a049;
-        }
-        button.secondary {
-            background-color: #2196F3;
-        }
-        button.secondary:hover {
-            background-color: #0b7dda;
-        }
-        button.delete {
-            background-color: #f44336;
-        }
-        button.delete:hover {
-            background-color: #d32f2f;
-        }
-        .message {
-            padding: 10px;
-            margin-bottom: 20px;
-            border-radius: 4px;
-        }
-        .success {
-            background-color: #d4edda;
-            color: #155724;
-        }
-        .error {
-            background-color: #f8d7da;
-            color: #721c24;
-        }
-        .hidden {
-            display: none;
-        }
-        .file-container {
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            color: var(--dark-color);
+            background-color: #f0f5ff;
+            line-height: 1.6;
+            min-height: 100vh;
             display: flex;
+            flex-direction: column;
         }
-        .store-list {
-            width: 30%;
-            padding-right: 20px;
+
+        header {
+            background-color: white;
+            box-shadow: var(--box-shadow);
+            padding: 15px 0;
+            z-index: 10;
         }
-        .file-details {
-            width: 70%;
-        }
-        .store-item {
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            margin-bottom: 10px;
-            cursor: pointer;
-        }
-        .store-item:hover {
-            background-color: #f5f5f5;
-        }
-        .store-item.selected {
-            background-color: #e3f2fd;
-            border-color: #2196F3;
-        }
-        .files-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        .files-table th,
-        .files-table td {
-            padding: 10px;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
-        }
-        .files-table th {
-            background-color: #f2f2f2;
-        }
-        .files-table tr:hover {
-            background-color: #f5f5f5;
-        }
-        .file-actions {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 15px;
-        }
-        .file-details-panel {
-            margin-top: 20px;
-            padding: 15px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
-        .details-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        .details-table td {
-            padding: 8px;
-            border-bottom: 1px solid #eee;
-        }
-        .details-table tr:first-child td {
-            border-top: 1px solid #eee;
-        }
-        .property-name {
-            font-weight: bold;
-            width: 30%;
-        }
-        .info-box {
-            background-color: #e8f4f8;
-            padding: 15px;
-            border-radius: 4px;
-            margin-bottom: 20px;
-        }
-        .header-actions {
+
+        .header-content {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            padding: 0 20px;
+            max-width: 1440px;
+            margin: 0 auto;
+        }
+
+        h1, h2, h3, h4 {
+            font-weight: 600;
+            color: var(--dark-color);
+            margin-bottom: 0.75rem;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            margin-bottom: 0;
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        h3 {
+            font-size: 1.2rem;
+            margin-top: 1.25rem;
+        }
+
+        /* Layout */
+        .app-container {
+            display: flex;
+            flex: 1;
+            max-width: 1440px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: var(--sidebar-width);
+            background-color: white;
+            border-right: 1px solid var(--light-gray);
+            padding: 20px 0;
+            height: calc(100vh - 70px);
+            position: sticky;
+            top: 70px;
+            overflow-y: auto;
+        }
+
+        .sidebar-section {
+            padding: 0 20px 20px;
+            border-bottom: 1px solid var(--light-gray);
             margin-bottom: 20px;
         }
-        .active-store {
-            background-color: #e8f5e9;
+
+        .sidebar-section:last-child {
+            border-bottom: none;
         }
-        .set-active-btn[disabled] {
-            background-color: #4CAF50;
+
+        .sidebar-section-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--gray-color);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 15px;
+        }
+
+        /* Main content */
+        .main-content {
+            flex: 1;
+            padding: 20px;
+        }
+
+        /* Form elements */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--dark-color);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid var(--light-gray);
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-light);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+        }
+
+        textarea.form-control {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .form-text {
+            display: block;
+            margin-top: 5px;
+            font-size: 0.875rem;
+            color: var(--gray-color);
+        }
+
+        /* Active store indicator */
+        .active-store-indicator {
+            background-color: #ecfdf5;
+            border-left: 4px solid var(--success-color);
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: var(--border-radius);
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 20px;
+            border: none;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            text-decoration: none;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+
+        .btn-block {
+            display: block;
+            width: 100%;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
             color: white;
-            opacity: 0.8;
-            cursor: default;
         }
+
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .btn-secondary {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: #0096c7;
+        }
+
+        .btn-success {
+            background-color: var(--success-color);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background-color: #22c55e;
+        }
+
+        .btn-danger {
+            background-color: var(--danger-color);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: #e11d48;
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 0.875rem;
+        }
+
+        .btn i {
+            margin-right: 8px;
+        }
+
+        .btn[disabled] {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        /* Card styles */
+        .card {
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .card-header {
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--light-gray);
+            background-color: #fafafa;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-header h3 {
+            margin: 0;
+        }
+
+        .card-body {
+            padding: 20px;
+        }
+
+        /* Alert/Message styles */
+        .alert {
+            padding: 15px 20px;
+            border-radius: var(--border-radius);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .alert i {
+            margin-right: 10px;
+            font-size: 1.25rem;
+            margin-top: 2px;
+        }
+
+        .alert-success {
+            background-color: #ecfdf5;
+            color: #065f46;
+            border-left: 4px solid var(--success-color);
+        }
+
+        .alert-danger {
+            background-color: #fef2f2;
+            color: #991b1b;
+            border-left: 4px solid var(--danger-color);
+        }
+
+        .alert-warning {
+            background-color: #fffbeb;
+            color: #92400e;
+            border-left: 4px solid var(--warning-color);
+        }
+
+        .alert-info {
+            background-color: #eff6ff;
+            color: #1e40af;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        /* Table styles */
+        .table-container {
+            overflow-x: auto;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            margin-bottom: 20px;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: white;
+        }
+
+        .table th,
+        .table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--light-gray);
+        }
+
+        .table th {
+            background-color: #f8fafc;
+            font-weight: 600;
+            color: var(--dark-color);
+        }
+
+        .table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .table tr:hover {
+            background-color: #f8fafc;
+        }
+
+        .table tr.active {
+            background-color: rgba(67, 97, 238, 0.05);
+        }
+
+        /* File details row styles */
         .file-details-row {
-            background-color: #f9f9f9;
+            background-color: #f8fafc;
         }
 
         .file-details-row.hidden {
@@ -219,106 +360,329 @@
             padding: 0 !important;
         }
 
-        .inline-details-panel {
-            padding: 15px;
-            border-top: 1px solid #ddd;
-            border-bottom: 1px solid #ddd;
-            background-color: #f9f9f9;
+        .file-details-content {
+            padding: 20px;
+            border-top: 1px solid var(--light-gray);
         }
 
-        .files-table tr.file-row:hover + tr.file-details-row:not(.hidden) {
-            background-color: #f9f9f9;
+        /* Badge styles */
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            border-radius: 9999px;
+            margin-left: 5px;
+        }
+
+        .badge-primary {
+            background-color: var(--primary-light);
+            color: white;
+        }
+
+        .badge-success {
+            background-color: var(--success-color);
+            color: white;
+        }
+
+        /* File upload styles */
+        .file-upload {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .file-upload input[type="file"] {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid var(--light-gray);
+            border-radius: var(--border-radius);
+        }
+
+        /* Vector Store List styles */
+        .store-list {
+            margin-top: 15px;
+        }
+
+        .store-item {
+            padding: 12px;
+            border: 1px solid var(--light-gray);
+            border-radius: var(--border-radius);
+            margin-bottom: 10px;
+            background-color: white;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .store-item:hover {
+            border-color: var(--primary-light);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .store-item.active {
+            border-left: 4px solid var(--success-color);
+        }
+
+        .store-item.selected:not(.active) {
+            border-color: var(--primary-color);
+            border-left: 4px solid var(--primary-color);
+            background-color: rgba(67, 97, 238, 0.05);
+        }
+
+        .store-name {
+            font-weight: 600;
+            display: block;
+            margin-bottom: 8px;
+            font-size: 1rem;
+        }
+
+        .store-actions {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 8px;
+        }
+
+        .active-indicator {
+            display: inline-flex;
+            align-items: center;
+            font-size: 0.85rem;
+            color: var(--success-color);
+            font-weight: 500;
+        }
+
+        .active-indicator i {
+            margin-right: 5px;
+        }
+
+        /* Helper classes */
+        .d-flex {
+            display: flex;
+        }
+
+        .justify-between {
+            justify-content: space-between;
+        }
+
+        .align-center {
+            align-items: center;
+        }
+
+        .mb-0 {
+            margin-bottom: 0;
+        }
+
+        .mb-1 {
+            margin-bottom: 10px;
+        }
+
+        .mb-2 {
+            margin-bottom: 20px;
+        }
+
+        .ml-1 {
+            margin-left: 10px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .app-container {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: static;
+                border-right: none;
+                border-bottom: 1px solid var(--light-gray);
+            }
+            
+            .btn {
+                width: 100%;
+                margin-right: 0;
+            }
+            
+            .header-content {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .header-content a {
+                margin-top: 10px;
+            }
+        }
+
+        /* Add these styles to make the status badge look good */
+        #storeActiveStatus {
+            margin-left: 10px;
+        }
+
+        #storeActiveStatus .badge {
+            margin-left: 0;
+        }
+
+        .badge-primary {
+            background-color: var(--primary-light);
+            color: white;
+        }
+
+        /* Adjust file upload button to specify which store it's uploading to */
+        .upload-note {
+            font-size: 0.9rem;
+            color: var(--gray-color);
+            margin-bottom: 10px;
+        }
+
+        /* Update the store-item.active style when it's also selected */
+        .store-item.active.selected {
+            background-color: rgba(67, 97, 238, 0.05);
+            border-color: var(--primary-color);
+            border-left: 4px solid var(--primary-color);
+        }
+
+        /* Keep the 'Currently Active' indicator text color green */
+        .store-item.active.selected .active-indicator {
+            color: var(--success-color);
+        }
+
+        /* Make sure the left border stays consistent */
+        .store-item.active:not(.selected) {
+            border-left: 4px solid var(--success-color);
         }
     </style>
 </head>
 <body>
-    <div class="header-actions">
-        <h1>OpenAI Chatbot Administration</h1>
-        <a href="/webchat"><button class="secondary">Go to Chat Interface</button></a>
-    </div>
-    
-    <div id="message" class="message hidden"></div>
-    
-    <div class="tab-container">
-        <div class="tab-buttons">
-            <button class="tab-button active" onclick="openTab(event, 'configTab')">Assistant Configuration</button>
-            <button class="tab-button" onclick="openTab(event, 'vectorStoresTab')">File Management</button>
+    <header>
+        <div class="header-content">
+            <h1>AI Assistant Administration</h1>
+            <a href="/webchat" class="btn btn-secondary">
+                <i class="fas fa-comments"></i> Go to Chat Interface
+            </a>
         </div>
-        
-        <!-- Assistant Configuration Tab -->
-        <div id="configTab" class="tab-content active">
-            <div class="info-box">
-                <p><strong>Assistant Configuration</strong>: Manage your OpenAI API key and vector stores.</p>
-                <p>This will update the config.yaml file used by the application.</p>
-            </div>
-            
+    </header>
+
+    <!-- Alert/Message Container -->
+    <div id="message" class="alert hidden" style="position: fixed; top: 15px; right: 15px; z-index: 1000; max-width: 400px;"></div>
+
+    <div class="app-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
             <!-- API Key Section -->
-            <h2>API Configuration</h2>
-            <div class="form-group">
-                <label for="apiKey">OpenAI API Key:</label>
-                <input type="password" id="apiKey" placeholder="Enter your OpenAI API key" autocomplete="off">
-                <small>Your OpenAI API key is stored in the config.yaml file.</small>
-            </div>
-            <button onclick="saveConfig()">Save API Key</button>
-            
-            <div class="info-box" style="margin-top: 20px; background-color: #fff3cd; color: #856404;">
-                <p><strong>Note:</strong> Changes to the API key will take effect immediately for new requests.</p>
-            </div>
-            
-            <h2>Assistant Configuration</h2>
-            <div class="form-group">
-                <label for="assistantName">Assistant Name:</label>
-                <input type="text" id="assistantName" placeholder="Enter assistant name (e.g., D&D Helper)">
-                <small>This name will be displayed in the chat interface.</small>
-            </div>
-            <button onclick="saveAssistantName()">Save Assistant Name</button>
-            
-            <!-- Vector Store Management Section -->
-            <h2>Vector Store Management</h2>
-            <button onclick="loadVectorStores()" class="secondary">Refresh Vector Store List</button>
-            
-            <div class="form-group" style="margin-top: 15px;">
-                <label for="vectorStoreId">Current Active Vector Store:</label>
-                <input type="text" id="vectorStoreId" placeholder="Vector Store ID" readonly>
+            <div class="sidebar-section">
+                <div class="sidebar-section-title">
+                    <i class="fas fa-key"></i> API Configuration
+                </div>
+                <div class="form-group">
+                    <label for="apiKey">OpenAI API Key:</label>
+                    <input type="password" id="apiKey" class="form-control" placeholder="Enter your OpenAI API key" autocomplete="off">
+                    <span class="form-text">Stored in config.yaml file</span>
+                </div>
+                <button onclick="saveConfig()" class="btn btn-primary btn-block">
+                    <i class="fas fa-save"></i> Save API Key
+                </button>
             </div>
             
-            <div id="vectorStoreList" style="margin: 20px 0;"></div>
+            <!-- Assistant Name Section -->
+            <div class="sidebar-section">
+                <div class="sidebar-section-title">
+                    <i class="fas fa-robot"></i> Assistant Name
+                </div>
+                <div class="form-group">
+                    <label for="assistantName">Assistant Name:</label>
+                    <input type="text" id="assistantName" class="form-control" placeholder="Enter assistant name (e.g., D&D Helper)">
+                    <span class="form-text">Displayed in chat interface</span>
+                </div>
+                <button onclick="saveAssistantName()" class="btn btn-primary btn-block">
+                    <i class="fas fa-save"></i> Save Name
+                </button>
+            </div>
             
-            <h3>Create New Vector Store</h3>
-            <div class="form-group">
-                <input type="text" id="newStoreName" placeholder="Name">
+            <!-- Vector Store Section -->
+            <div class="sidebar-section">
+                <div class="sidebar-section-title">
+                    <i class="fas fa-database"></i> Vector Stores
+                </div>
+                
+                <button onclick="loadVectorStores()" class="btn btn-secondary btn-block mb-2">
+                    <i class="fas fa-sync-alt"></i> Refresh Stores
+                </button>
+                
+                <div id="vectorStoreList" class="store-list"></div>
+                
+                <h3><i class="fas fa-plus-circle"></i> Create New Store</h3>
+                <div class="form-group">
+                    <input type="text" id="newStoreName" class="form-control" placeholder="Name">
+                </div>
+                <div class="form-group">
+                    <textarea id="newStoreDescription" class="form-control" placeholder="Description (optional)"></textarea>
+                </div>
+                <button onclick="createVectorStore()" class="btn btn-success btn-block">
+                    <i class="fas fa-plus"></i> Create Store
+                </button>
             </div>
-            <div class="form-group">
-                <textarea id="newStoreDescription" placeholder="Description (optional)"></textarea>
-            </div>
-            <button onclick="createVectorStore()">Create Vector Store</button>
         </div>
         
-        <!-- File Management Tab -->
-        <div id="vectorStoresTab" class="tab-content">
-            <div class="info-box">
-                <p><strong>File Management</strong>: Manage files in the current vector store.</p>
-                <p>Current Vector Store: <strong id="currentVectorStoreName">Loading...</strong></p>
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- File Management Section -->
+            <div class="active-store-indicator">
+                <div class="d-flex justify-between align-center">
+                    <div>
+                        <h2 class="mb-0"><i class="fas fa-database"></i> OpenAI Vector Store Management</h2>
+                        <div class="d-flex align-center">
+                            <span>Current Store: <strong id="currentVectorStoreName">Loading...</strong></span>
+                            <div id="storeActiveStatus"></div>
+                        </div>
+                    </div>
+                    <div id="storeActionButtons">
+                        <!-- Buttons will be added dynamically -->
+                    </div>
+                </div>
             </div>
             
-            <div id="noVectorStoreWarning" class="info-box" style="background-color: #fff3cd; color: #856404;">
-                <p><strong>Note:</strong> No active vector store selected. Please select or create a vector store in the Assistant Configuration tab.</p>
+            <div id="noVectorStoreWarning" class="alert alert-warning">
+                <i class="fas fa-exclamation-triangle"></i>
+                <div>
+                    <strong>Note:</strong> No active vector store selected. Please select or create a vector store from the sidebar.
+                </div>
             </div>
             
             <div id="fileManagementContainer" class="hidden">
-                <div class="file-actions">
-                    <button onclick="loadFiles(activeVectorStoreId)" class="secondary">Refresh Files</button>
-                    <button onclick="deleteSelectedFiles()" class="delete">Delete Selected Files</button>
+                <div class="card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-list"></i> Files</h3>
+                        <div>
+                            <button onclick="loadFiles(activeVectorStoreId)" class="btn btn-secondary btn-sm">
+                                <i class="fas fa-sync-alt"></i> Refresh
+                            </button>
+                            <button onclick="deleteSelectedFiles()" class="btn btn-danger btn-sm ml-1">
+                                <i class="fas fa-trash-alt"></i> Delete Selected
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div id="fileList"></div>
+                    </div>
                 </div>
                 
-                <div id="fileList"></div>
-                <div id="fileDetailsSection" class="file-details-panel hidden"></div>
-                
-                <h3>Upload New File</h3>
-                <div class="form-group">
-                    <input type="file" id="fileUpload">
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h3><i class="fas fa-upload"></i> Upload New File</h3>
+                    </div>
+                    <div class="card-body">
+                        <div id="uploadStoreNote" class="upload-note mb-2"></div>
+                        <div class="file-upload mb-2">
+                            <input type="file" id="fileUpload" class="form-control">
+                        </div>
+                        <button onclick="uploadFile()" class="btn btn-success">
+                            <i class="fas fa-upload"></i> Upload File
+                        </button>
+                    </div>
                 </div>
-                <button onclick="uploadFile()">Upload File</button>
             </div>
         </div>
     </div>
@@ -330,35 +694,26 @@
         
         // ----- Helper Functions -----
         
-        // Tab functionality
-        function openTab(evt, tabName) {
-            // Hide all tab content
-            const tabContents = document.getElementsByClassName("tab-content");
-            for (let i = 0; i < tabContents.length; i++) {
-                tabContents[i].classList.remove("active");
-            }
-            
-            // Remove active class from tab buttons
-            const tabButtons = document.getElementsByClassName("tab-button");
-            for (let i = 0; i < tabButtons.length; i++) {
-                tabButtons[i].classList.remove("active");
-            }
-            
-            // Show the selected tab content and mark the button as active
-            document.getElementById(tabName).classList.add("active");
-            evt.currentTarget.classList.add("active");
-        }
-        
         // Show temporary message
         function showMessage(text, isError = false) {
             const messageEl = document.getElementById('message');
             messageEl.textContent = text;
-            messageEl.className = isError ? 'message error' : 'message success';
+            
+            // Set the appropriate class based on message type
+            messageEl.className = isError ? 'alert alert-danger' : 'alert alert-success';
+            
+            // Add appropriate icon
+            const icon = document.createElement('i');
+            icon.className = isError ? 'fas fa-exclamation-circle' : 'fas fa-check-circle';
+            messageEl.prepend(icon);
+            
+            // Show the message
             messageEl.classList.remove('hidden');
             
             // Hide message after 5 seconds
             setTimeout(() => {
                 messageEl.classList.add('hidden');
+                messageEl.innerHTML = '';
             }, 5000);
         }
         
@@ -390,13 +745,11 @@
                     document.getElementById('apiKey').placeholder = config.api_key;
                 }
                 if (config.vector_store_id) {
-                    document.getElementById('vectorStoreId').value = config.vector_store_id;
                     activeVectorStoreId = config.vector_store_id;
                     
-                    // Update file management tab
-                    updateFileManagementTab();
+                    // Update file management section
+                    updateFileManagementSection();
                 }
-                // Add this new section for assistant name
                 if (config.assistant_name) {
                     document.getElementById('assistantName').placeholder = config.assistant_name;
                 }
@@ -445,7 +798,7 @@
             }
         }
         
-        // Add this to the API Configuration Functions section
+        // Save assistant name
         async function saveAssistantName() {
             const assistantName = document.getElementById('assistantName').value.trim();
             
@@ -485,34 +838,41 @@
 
         // ----- Vector Store Functions -----
         
-        // Update file management tab based on active vector store
-        function updateFileManagementTab() {
+        // Update file management section based on active vector store
+        function updateFileManagementSection() {
             const noWarning = document.getElementById('noVectorStoreWarning');
             const fileContainer = document.getElementById('fileManagementContainer');
-            const nameElement = document.getElementById('currentVectorStoreName');
             
             if (activeVectorStoreId) {
-                // Hide warning, show file management
-                noWarning.classList.add('hidden');
-                fileContainer.classList.remove('hidden');
-                
                 // Find the store name
                 const storeItem = document.querySelector(`.store-item[data-id="${activeVectorStoreId}"]`);
-                const storeName = storeItem ? storeItem.querySelector('strong').textContent : activeVectorStoreId;
+                const storeName = storeItem ? storeItem.dataset.name || activeVectorStoreId : activeVectorStoreId;
                 
-                nameElement.textContent = storeName;
+                // Use the new display function
+                displayStoreFiles(activeVectorStoreId, storeName);
                 
-                // Load files for the active vector store
-                loadFiles(activeVectorStoreId);
+                // Also update the action buttons
+                updateStoreHeader(activeVectorStoreId, storeName);
+                
+                // Add selected class to the active store
+                if (storeItem) {
+                    document.querySelectorAll('.store-item').forEach(el => {
+                        el.classList.remove('selected');
+                    });
+                    storeItem.classList.add('selected');
+                }
             } else {
                 // Show warning, hide file management
                 noWarning.classList.remove('hidden');
                 fileContainer.classList.add('hidden');
-                nameElement.textContent = 'None selected';
+                document.getElementById('currentVectorStoreName').textContent = 'None selected';
+                
+                // Clear the action buttons
+                document.getElementById('storeActionButtons').innerHTML = '';
             }
         }
         
-        // Load vector stores
+        // Load vector stores - modified function
         async function loadVectorStores() {
             try {
                 const response = await fetch('/storage-admin/vector-stores');
@@ -522,57 +882,100 @@
                 listEl.innerHTML = '';
                 
                 if (data.vector_stores && data.vector_stores.length > 0) {
-                    // Create a table for better formatting
-                    const table = document.createElement('table');
-                    table.className = 'files-table';
-                    
-                    // Add table header
-                    const thead = document.createElement('thead');
-                    thead.innerHTML = `
-                        <tr>
-                            <th>Name</th>
-                            <th>ID</th>
-                            <th>Actions</th>
-                        </tr>
-                    `;
-                    table.appendChild(thead);
-                    
-                    // Create table body
-                    const tbody = document.createElement('tbody');
-                    
                     data.vector_stores.forEach(store => {
-                        const tr = document.createElement('tr');
-                        tr.className = 'store-item';
-                        tr.dataset.id = store.id;
+                        const storeEl = document.createElement('div');
+                        storeEl.className = store.id === activeVectorStoreId ? 'store-item active' : 'store-item';
+                        storeEl.dataset.id = store.id;
+                        storeEl.dataset.name = store.name; // Add store name as data attribute for easier access
                         
-                        if (store.id === activeVectorStoreId) {
-                            tr.classList.add('active-store');
-                        }
+                        // Check if this is the active store
+                        const isActive = store.id === activeVectorStoreId;
                         
-                        tr.innerHTML = `
-                            <td><strong>${store.name}</strong></td>
-                            <td><small>${store.id}</small></td>
-                            <td>
-                                <button onclick="setAsActiveVectorStore('${store.id}')" class="secondary" 
-                                    ${store.id === activeVectorStoreId ? 'disabled' : ''}>
-                                    ${store.id === activeVectorStoreId ? 'Current Active Store' : 'Set as Active'}
-                                </button>
-                                <button onclick="deleteVectorStore('${store.id}')" class="delete">Delete</button>
-                            </td>
+                        // Simplified version - just store name and active indicator
+                        storeEl.innerHTML = `
+                            <div class="store-name">${store.name}</div>
+                            ${isActive ? 
+                                '<div class="active-indicator"><i class="fas fa-check-circle"></i> Currently Active</div>' : 
+                                ''}
                         `;
                         
-                        tbody.appendChild(tr);
+                        // Add click handler to select store and display its files
+                        storeEl.addEventListener('click', function() {
+                            // Update visual selection
+                            document.querySelectorAll('.store-item').forEach(el => {
+                                el.classList.remove('selected');
+                            });
+                            this.classList.add('selected');
+                            
+                            // Update the header and action buttons
+                            updateStoreHeader(store.id, store.name);
+                            
+                            // The key change: Display this store's files even if not active
+                            displayStoreFiles(store.id, store.name);
+                        });
+                        
+                        listEl.appendChild(storeEl);
                     });
-                    
-                    table.appendChild(tbody);
-                    listEl.appendChild(table);
                 } else {
-                    listEl.innerHTML = '<p>No vector stores found.</p>';
+                    listEl.innerHTML = '<div class="alert alert-info"><i class="fas fa-info-circle"></i> No vector stores found.</div>';
                 }
             } catch (error) {
                 console.error('Error loading vector stores:', error);
                 showMessage('Failed to load vector stores: ' + error.message, true);
             }
+        }
+
+        // New function to display a store's files without setting it as active
+        async function displayStoreFiles(storeId, storeName) {
+            const nameElement = document.getElementById('currentVectorStoreName');
+            const noWarning = document.getElementById('noVectorStoreWarning');
+            const fileContainer = document.getElementById('fileManagementContainer');
+            
+            // Update the displayed store name
+            nameElement.textContent = storeName || storeId;
+            
+            // Show the file management container and hide warning
+            noWarning.classList.add('hidden');
+            fileContainer.classList.remove('hidden');
+            
+            // Remove the status badge since we're showing it in the header buttons now
+            const storeStatusEl = document.getElementById('storeActiveStatus');
+            if (storeStatusEl) {
+                storeStatusEl.innerHTML = '';
+            }
+            
+            // Load files for this store
+            loadFiles(storeId);
+
+            // Update the upload card to show the target store
+            updateUploadCard();
+        }
+
+        // New function to update the header controls
+        function updateStoreHeader(storeId, storeName) {
+            const headerEl = document.getElementById('storeActionButtons');
+            const isActive = storeId === activeVectorStoreId;
+            
+            // If no store is selected, hide the action buttons
+            if (!storeId) {
+                headerEl.innerHTML = '';
+                return;
+            }
+            
+            // Show appropriate buttons based on whether this is the active store
+            headerEl.innerHTML = `
+                ${isActive ? 
+                    `<button class="btn btn-success btn-sm" disabled>
+                        <i class="fas fa-check-circle"></i> Active Store
+                    </button>` : 
+                    `<button onclick="setAsActiveVectorStore('${storeId}')" class="btn btn-primary btn-sm">
+                        <i class="fas fa-check-circle"></i> Set as Active
+                    </button>`
+                }
+                <button onclick="deleteVectorStore('${storeId}')" class="btn btn-danger btn-sm ml-1">
+                    <i class="fas fa-trash"></i> Delete
+                </button>
+            `;
         }
         
         // Create new vector store
@@ -645,16 +1048,20 @@
                     throw new Error(error.detail || 'Failed to update active vector store');
                 }
                 
-                showMessage(`Vector store set as active successfully!`);
+                // Get store name from the selected element
+                const storeEl = document.querySelector(`.store-item[data-id="${storeId}"]`);
+                const storeName = storeEl ? storeEl.dataset.name || storeId : storeId;
+                
+                showMessage(`Vector store "${storeName}" set as active successfully!`);
                 
                 // Update the global variable
                 activeVectorStoreId = storeId;
                 
-                // Update the displayed vector store ID
-                document.getElementById('vectorStoreId').value = storeId;
+                // Update file management section
+                updateFileManagementSection();
                 
-                // Update file management tab
-                updateFileManagementTab();
+                // Update the store action buttons
+                updateStoreHeader(storeId, storeName);
                 
                 // Refresh the vector stores to update the UI
                 loadVectorStores();
@@ -690,8 +1097,7 @@
                 // If we deleted the active store, clear it
                 if (storeId === activeVectorStoreId) {
                     activeVectorStoreId = null;
-                    document.getElementById('vectorStoreId').value = '';
-                    updateFileManagementTab();
+                    updateFileManagementSection();
                 }
                 
                 // Refresh the list
@@ -713,7 +1119,7 @@
             try {
                 // Show loading indicator
                 const listEl = document.getElementById('fileList');
-                listEl.innerHTML = '<p><i>Loading files...</i></p>';
+                listEl.innerHTML = '<div class="alert alert-info"><i class="fas fa-spinner fa-spin"></i> Loading files...</div>';
                 
                 const response = await fetch(`/storage-admin/vector-stores/${storeId}/files`);
                 if (!response.ok) {
@@ -726,15 +1132,18 @@
                 
                 if (data.files && data.files.length > 0) {
                     // Create a table for better formatting
+                    const tableContainer = document.createElement('div');
+                    tableContainer.className = 'table-container';
+                    
                     const table = document.createElement('table');
-                    table.className = 'files-table';
+                    table.className = 'table';
                     table.id = 'filesTable';
                     
                     // Add table header
                     const thead = document.createElement('thead');
                     thead.innerHTML = `
                         <tr>
-                            <th style="width: 30px;"></th>
+                            <th style="width: 30px;"><input type="checkbox" id="selectAllFiles" onclick="toggleAllFiles()"></th>
                             <th>File ID</th>
                             <th>Actions</th>
                         </tr>
@@ -755,9 +1164,11 @@
                             <td>
                                 <input type="checkbox" class="file-checkbox" data-id="${file.id}">
                             </td>
-                            <td>${file.id}</td>
+                            <td><code>${file.id}</code></td>
                             <td>
-                                <button onclick="getFileDetails('${file.id}')" class="secondary">View Details</button>
+                                <button onclick="getFileDetails('${file.id}')" class="btn btn-secondary btn-sm">
+                                    <i class="fas fa-info-circle"></i> View Details
+                                </button>
                             </td>
                         `;
                         
@@ -776,21 +1187,29 @@
                     });
                     
                     table.appendChild(tbody);
-                    listEl.appendChild(table);
+                    tableContainer.appendChild(table);
+                    listEl.appendChild(tableContainer);
                 } else {
-                    listEl.innerHTML = '<p>No files found in this vector store.</p>';
+                    listEl.innerHTML = '<div class="alert alert-info"><i class="fas fa-info-circle"></i> No files found in this vector store.</div>';
                 }
                 
                 selectedStoreFiles = data.files || [];
-                
-                // Hide the standalone file details section since we're using inline details
-                document.getElementById('fileDetailsSection').classList.add('hidden');
             } catch (error) {
                 console.error('Error loading files:', error);
                 document.getElementById('fileList').innerHTML = 
-                    `<p class="error">Failed to load files: ${error.message}</p>`;
+                    `<div class="alert alert-danger"><i class="fas fa-exclamation-circle"></i> Failed to load files: ${error.message}</div>`;
                 showMessage('Failed to load files: ' + error.message, true);
             }
+        }
+        
+        // Toggle all file checkboxes
+        function toggleAllFiles() {
+            const selectAll = document.getElementById('selectAllFiles');
+            const checkboxes = document.querySelectorAll('.file-checkbox');
+            
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = selectAll.checked;
+            });
         }
 
         // Get file details
@@ -814,7 +1233,7 @@
                 const detailsContent = document.getElementById(`details-content-${fileId}`);
                 
                 // Show loading indicator in the row
-                detailsContent.innerHTML = '<p><i>Loading file details...</i></p>';
+                detailsContent.innerHTML = '<div class="alert alert-info"><i class="fas fa-spinner fa-spin"></i> Loading file details...</div>';
                 detailsRow.classList.remove('hidden');
                 
                 // Fetch the file details
@@ -840,54 +1259,62 @@
                 
                 // Display file details
                 detailsContent.innerHTML = `
-                    <div class="inline-details-panel">
-                        <h3>File Details</h3>
-                        <table class="details-table">
-                            <tr>
-                                <td class="property-name">File ID:</td>
-                                <td>${fileDetails.id}</td>
-                            </tr>
-                            <tr>
-                                <td class="property-name">Filename:</td>
-                                <td>${fileDetails.filename || 'Unknown'}</td>
-                            </tr>
-                            <tr>
-                                <td class="property-name">File Size:</td>
-                                <td>${sizeStr}</td>
-                            </tr>
-                            <tr>
-                                <td class="property-name">Created Date:</td>
-                                <td>${dateStr}</td>
-                            </tr>
-                            <tr>
-                                <td class="property-name">Status:</td>
-                                <td>${fileDetails.status || 'Unknown'}</td>
-                            </tr>
-                            <tr>
-                                <td class="property-name">Purpose:</td>
-                                <td>${fileDetails.purpose || 'Unknown'}</td>
-                            </tr>
-                            <tr>
-                                <td class="property-name">Format:</td>
-                                <td>${fileDetails.format || 'Unknown'}</td>
-                            </tr>
-                        </table>
-                        <button onclick="closeInlineFileDetails('${fileId}')" class="secondary">Close Details</button>
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="mb-0"><i class="fas fa-file-alt"></i> File Details</h3>
+                        </div>
+                        <div class="card-body">
+                            <table class="table">
+                                <tr>
+                                    <td class="property-name">File ID:</td>
+                                    <td><code>${fileDetails.id}</code></td>
+                                </tr>
+                                <tr>
+                                    <td class="property-name">Filename:</td>
+                                    <td>${fileDetails.filename || 'Unknown'}</td>
+                                </tr>
+                                <tr>
+                                    <td class="property-name">File Size:</td>
+                                    <td>${sizeStr}</td>
+                                </tr>
+                                <tr>
+                                    <td class="property-name">Created Date:</td>
+                                    <td>${dateStr}</td>
+                                </tr>
+                                <tr>
+                                    <td class="property-name">Status:</td>
+                                    <td><span class="badge badge-${fileDetails.status === 'processed' ? 'success' : 'primary'}">${fileDetails.status || 'Unknown'}</span></td>
+                                </tr>
+                                <tr>
+                                    <td class="property-name">Purpose:</td>
+                                    <td>${fileDetails.purpose || 'Unknown'}</td>
+                                </tr>
+                                <tr>
+                                    <td class="property-name">Format:</td>
+                                    <td>${fileDetails.format || 'Unknown'}</td>
+                                </tr>
+                            </table>
+                            <button onclick="closeInlineFileDetails('${fileId}')" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> Close Details
+                            </button>
+                        </div>
                     </div>
                 `;
             } catch (error) {
                 console.error('Error getting file details:', error);
                 document.getElementById(`details-content-${fileId}`).innerHTML = 
-                    `<div class="inline-details-panel">
-                        <p class="error">Failed to load file details: ${error.message}</p>
-                        <button onclick="closeInlineFileDetails('${fileId}')" class="secondary">Close</button>
+                    `<div class="alert alert-danger">
+                        <i class="fas fa-exclamation-circle"></i> Failed to load file details: ${error.message}
+                        <button onclick="closeInlineFileDetails('${fileId}')" class="btn btn-secondary btn-sm ml-1">
+                            <i class="fas fa-times"></i> Close
+                        </button>
                     </div>`;
                 
                 showMessage('Failed to load file details: ' + error.message, true);
             }
         }
 
-        // Add this new function to close inline file details
+        // Close inline file details
         function closeInlineFileDetails(fileId) {
             const detailsRow = document.getElementById(`file-details-${fileId}`);
             if (detailsRow) {
@@ -895,12 +1322,18 @@
             }
         }
         
-        // Upload file
+        // Update the upload file function to use the selected store ID instead of the active store ID
         async function uploadFile() {
-            if (!activeVectorStoreId) {
-                showMessage('No active vector store selected', true);
+            // Get the currently selected/viewed store (not necessarily the active one)
+            const selectedStoreEl = document.querySelector('.store-item.selected');
+            
+            if (!selectedStoreEl) {
+                showMessage('No vector store selected for upload', true);
                 return;
             }
+            
+            const selectedStoreId = selectedStoreEl.dataset.id;
+            const selectedStoreName = selectedStoreEl.dataset.name || selectedStoreId;
             
             const fileInput = document.getElementById('fileUpload');
             if (!fileInput.files || fileInput.files.length === 0) {
@@ -914,9 +1347,9 @@
             
             try {
                 // Show loading message
-                showMessage('Uploading file... This may take a while for large files.', false);
+                showMessage(`Uploading file to "${selectedStoreName}"... This may take a while for large files.`, false);
                 
-                const response = await fetch(`/storage-admin/vector-stores/${activeVectorStoreId}/files`, {
+                const response = await fetch(`/storage-admin/vector-stores/${selectedStoreId}/files`, {
                     method: 'POST',
                     body: formData
                 });
@@ -926,20 +1359,20 @@
                     throw new Error(error.detail || 'Failed to upload file');
                 }
                 
-                showMessage(`File "${file.name}" uploaded successfully!`);
+                showMessage(`File "${file.name}" uploaded successfully to "${selectedStoreName}"!`);
                 
                 // Clear file input
                 fileInput.value = '';
                 
-                // Refresh files for the active vector store
-                await loadFiles(activeVectorStoreId);
+                // Refresh files for the selected store (not necessarily the active one)
+                await loadFiles(selectedStoreId);
             } catch (error) {
                 console.error('Error uploading file:', error);
                 showMessage('Failed to upload file: ' + error.message, true);
             }
         }
-        
-        // Delete selected files
+
+        // Update the Delete Selected Files function to use the selected store instead of active store
         async function deleteSelectedFiles() {
             const selectedFileIds = Array.from(document.querySelectorAll('.file-checkbox:checked'))
                 .map(checkbox => checkbox.dataset.id);
@@ -949,7 +1382,17 @@
                 return;
             }
             
-            if (!confirm(`Are you sure you want to delete ${selectedFileIds.length} file(s)? This action cannot be undone.`)) {
+            // Get the currently selected/viewed store
+            const selectedStoreEl = document.querySelector('.store-item.selected');
+            if (!selectedStoreEl) {
+                showMessage('No vector store selected', true);
+                return;
+            }
+            
+            const selectedStoreId = selectedStoreEl.dataset.id;
+            const selectedStoreName = selectedStoreEl.dataset.name || selectedStoreId;
+            
+            if (!confirm(`Are you sure you want to delete ${selectedFileIds.length} file(s) from "${selectedStoreName}"? This action cannot be undone.`)) {
                 return;
             }
             
@@ -961,7 +1404,7 @@
                     },
                     body: JSON.stringify({
                         file_ids: selectedFileIds,
-                        vector_store_id: activeVectorStoreId
+                        vector_store_id: selectedStoreId // Use selected store, not active store
                     })
                 });
                 
@@ -970,16 +1413,36 @@
                     throw new Error(error.detail || 'Failed to delete files');
                 }
                 
-                showMessage(`${selectedFileIds.length} file(s) deleted successfully!`);
+                showMessage(`${selectedFileIds.length} file(s) deleted successfully from "${selectedStoreName}"!`);
                 
-                // Hide file details if showing
-                document.getElementById('fileDetailsSection').classList.add('hidden');
+                // Uncheck "select all" if it was checked
+                const selectAllCheckbox = document.getElementById('selectAllFiles');
+                if (selectAllCheckbox && selectAllCheckbox.checked) {
+                    selectAllCheckbox.checked = false;
+                }
                 
-                // Refresh files
-                await loadFiles(activeVectorStoreId);
+                // Refresh files for the selected store
+                await loadFiles(selectedStoreId);
             } catch (error) {
                 console.error('Error deleting files:', error);
                 showMessage('Failed to delete files: ' + error.message, true);
+            }
+        }
+
+        // Update the upload card message to reflect the new behavior
+        function updateUploadCard() {
+            const uploadNoteEl = document.getElementById('uploadStoreNote');
+            const selectedStoreEl = document.querySelector('.store-item.selected');
+            
+            if (uploadNoteEl && selectedStoreEl) {
+                const selectedStoreName = selectedStoreEl.dataset.name || selectedStoreEl.dataset.id;
+                const isActive = selectedStoreEl.classList.contains('active');
+                
+                if (isActive) {
+                    uploadNoteEl.innerHTML = `Uploading to active store: <strong>${selectedStoreName}</strong>`;
+                } else {
+                    uploadNoteEl.innerHTML = `Uploading to: <strong>${selectedStoreName}</strong> <span class="badge badge-primary">Not Active</span>`;
+                }
             }
         }
         
@@ -987,6 +1450,8 @@
         document.addEventListener('DOMContentLoaded', () => {
             loadConfig();
             loadVectorStores();
+            
+            // We don't need the setTimeout anymore since our new functions handle this better
         });
     </script>
 </body>
