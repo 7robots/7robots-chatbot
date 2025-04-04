@@ -1212,25 +1212,43 @@
             });
         }
 
-        // Get file details
+        // Update the getFileDetails function to toggle the display and button text
         async function getFileDetails(fileId) {
             try {
                 // Get the details row for this file
                 const detailsRow = document.getElementById(`file-details-${fileId}`);
+                // Get the button that was clicked
+                const detailsButton = document.querySelector(`#file-row-${fileId} button`);
                 
                 // If this row is already visible, just hide it (toggle behavior)
                 if (!detailsRow.classList.contains('hidden')) {
                     detailsRow.classList.add('hidden');
+                    // Change button text/icon back to "View Details"
+                    detailsButton.innerHTML = '<i class="fas fa-info-circle"></i> View Details';
                     return;
                 }
                 
-                // Hide any other currently visible details rows
+                // Hide any other currently visible details rows and reset their buttons
                 document.querySelectorAll('.file-details-row').forEach(row => {
-                    row.classList.add('hidden');
+                    if (!row.classList.contains('hidden')) {
+                        const rowId = row.id.replace('file-details-', '');
+                        const btn = document.querySelector(`#file-row-${rowId} button`);
+                        if (btn) btn.innerHTML = '<i class="fas fa-info-circle"></i> View Details';
+                        row.classList.add('hidden');
+                    }
                 });
+                
+                // Change this button to show "Hide Details"
+                detailsButton.innerHTML = '<i class="fas fa-times-circle"></i> Hide Details';
                 
                 // Get the details content container
                 const detailsContent = document.getElementById(`details-content-${fileId}`);
+                
+                // If the content is already loaded, just show it
+                if (detailsContent.children.length > 0 && !detailsContent.querySelector('.alert-info')) {
+                    detailsRow.classList.remove('hidden');
+                    return;
+                }
                 
                 // Show loading indicator in the row
                 detailsContent.innerHTML = '<div class="alert alert-info"><i class="fas fa-spinner fa-spin"></i> Loading file details...</div>';
@@ -1257,7 +1275,7 @@
                     dateStr = date.toLocaleString();
                 }
                 
-                // Display file details
+                // Display file details (no close button needed anymore)
                 detailsContent.innerHTML = `
                     <div class="card">
                         <div class="card-header">
@@ -1294,9 +1312,6 @@
                                     <td>${fileDetails.format || 'Unknown'}</td>
                                 </tr>
                             </table>
-                            <button onclick="closeInlineFileDetails('${fileId}')" class="btn btn-secondary">
-                                <i class="fas fa-times"></i> Close Details
-                            </button>
                         </div>
                     </div>
                 `;
@@ -1305,22 +1320,13 @@
                 document.getElementById(`details-content-${fileId}`).innerHTML = 
                     `<div class="alert alert-danger">
                         <i class="fas fa-exclamation-circle"></i> Failed to load file details: ${error.message}
-                        <button onclick="closeInlineFileDetails('${fileId}')" class="btn btn-secondary btn-sm ml-1">
-                            <i class="fas fa-times"></i> Close
-                        </button>
                     </div>`;
                 
                 showMessage('Failed to load file details: ' + error.message, true);
             }
         }
 
-        // Close inline file details
-        function closeInlineFileDetails(fileId) {
-            const detailsRow = document.getElementById(`file-details-${fileId}`);
-            if (detailsRow) {
-                detailsRow.classList.add('hidden');
-            }
-        }
+        // We can remove the closeInlineFileDetails function since it's no longer needed
         
         // Update the upload file function to use the selected store ID instead of the active store ID
         async function uploadFile() {
