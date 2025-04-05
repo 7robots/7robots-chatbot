@@ -624,9 +624,6 @@
                 <div class="form-group">
                     <input type="text" id="newStoreName" class="form-control" placeholder="Name">
                 </div>
-                <div class="form-group">
-                    <textarea id="newStoreDescription" class="form-control" placeholder="Description (optional)"></textarea>
-                </div>
                 <button onclick="createVectorStore()" class="btn btn-success btn-block">
                     <i class="fas fa-plus"></i> Create Store
                 </button>
@@ -985,10 +982,11 @@
             `;
         }
         
-        // Create new vector store
+        // Create new vector store - updated to remove description
         async function createVectorStore() {
             const name = document.getElementById('newStoreName').value.trim();
-            const description = document.getElementById('newStoreDescription').value.trim();
+            // Remove references to description
+            // const description = document.getElementById('newStoreDescription').value.trim();
             
             if (!name) {
                 showMessage('Please enter a name for the vector store', true);
@@ -1002,8 +1000,9 @@
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        name,
-                        description: description || undefined
+                        name
+                        // Remove the description field
+                        // description: description || undefined
                     })
                 });
                 
@@ -1016,7 +1015,8 @@
                 
                 // Clear input fields
                 document.getElementById('newStoreName').value = '';
-                document.getElementById('newStoreDescription').value = '';
+                // Remove clearing of description field
+                // document.getElementById('newStoreDescription').value = '';
                 
                 // Refresh the list
                 await loadVectorStores();

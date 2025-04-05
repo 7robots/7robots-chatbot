@@ -95,7 +95,6 @@ class ChatRequest(BaseModel):
 
 class VectorStoreRequest(BaseModel):
     name: str
-    description: Optional[str] = None
 
 class FileDeleteRequest(BaseModel):
     file_ids: List[str]
@@ -267,8 +266,7 @@ async def list_vector_stores():
 async def create_vector_store(request: VectorStoreRequest):
     try:
         response = client.vector_stores.create(
-            name=request.name,
-            description=request.description
+            name=request.name
         )
         return response
     except Exception as e:
