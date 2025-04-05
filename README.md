@@ -51,13 +51,13 @@ Edit config.yaml to:
 
 (note: all three of these functions can also be done via the admin web interface, but it's probably easier to do them in the config.yaml file before you start the service. Should you need to change any of these three settings, the chatbot application will automatically load the settings without the need to stop/start again)
 
-
+```
 assistant:
   name: My Assistant
 openai:
   api_key: your_openai_api_key_here
   vector_store_id: your_vector_store_id_here
-
+```
 
 ## Start the FastAPI server with uvicorn
 fastapi run agent.py
