@@ -6,6 +6,8 @@
 
 This document provides basic instructions on how to run the AI assistant in a Docker container on your desktop. It does not contain more detailed documentation on cloud-based deployments.
 
+NOTE: this README provides instructions on how to run this application in a Docker Container. If you would prefer to run it in a python virtual environment (venv), look at [README.md](https://github.com/7robots/7robots-chatbot/blob/main/README.md).
+
  ## Prerequisites
 
  - Docker or Docker Desktop
