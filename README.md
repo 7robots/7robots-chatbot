@@ -4,7 +4,7 @@
 
  This software can be used to serve an AI Chatbot interface to provide answers about your documents. It leverages OpenAI's new Agents framework to provide the GAI back-end. Similarly, it also leverages vector storage provided by the OpenAI to store your documents.
 
-NOTE: this README provides instructions on how to run this application in a python virtual environment. If you would prefer to run it in a Docker container, look at README.Docker.md.
+NOTE: this README provides instructions on how to run this application in a python virtual environment. If you would prefer to run it in a Docker container, look at [README.Docker.md](https://github.com/7robots/7robots-chatbot/blob/main/README.Docker.md).
 
  ## Prerequisites
 
