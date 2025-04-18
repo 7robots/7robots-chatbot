@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Assistant</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.5;
+            color: #333;
+        }
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border-width: 0;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        textarea {
+            width: 100%;
+            height: 100px;
+            margin-bottom: 10px;
+            padding: 10px;
+            border: 2px solid #ccc;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        textarea:focus, input:focus, button:focus {
+            outline: 3px solid #4d90fe;
+            border-color: #4d90fe;
+        }
+        .controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        input[type="number"] {
+            padding: 8px;
+            width: 70px;
+            border: 2px solid #ccc;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #0070f3;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0051b3;
+        }
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        #response {
+            white-space: pre-wrap;
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 5px;
+            min-height: 50px;
+            border: 1px solid #ddd;
+        }
+        .status {
+            font-style: italic;
+            color: #666;
+        }
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                transition: none !important;
+                animation: none !important;
+            }
+        }
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="chat-header">
+            <h1 class="chat-title">AI Assistant</h1>
+        </div>
+    </header>
+    <main>
+        <form id="chatForm" onsubmit="sendMessage(event)">
+            <div class="form-group">
+                <label for="message">Your question:</label>
+                <textarea 
+                    id="message" 
+                    name="message" 
+                    placeholder="Enter your question here..." 
+                    aria-required="true"
+                    required
+                ></textarea>
+            </div>
+            <div class="controls">
+                <div>
+                    <label for="temperature">Temperature:</label>
+                    <input 
+                        type="number" 
+                        id="temperature" 
+                        name="temperature"
+                        value="1.0" 
+                        min="0" 
+                        max="2" 
+                        step="0.1"
+                        aria-describedby="temp-desc"
+                    >
+                    <div id="temp-desc" class="sr-only">Controls randomness: lower is more deterministic, higher is more creative</div>
+                </div>
+                <button type="submit" id="submitButton">Send Question</button>
+            </div>
+        </form>
+        
+        <section aria-live="polite">
+            <h2>Response:</h2>
+            <div id="response" aria-atomic="true"></div>
+        </section>
+    </main>
+
+    <script>
+        async function sendMessage(event) {
+            if (event) {
+                event.preventDefault();
+            }
+            
+            const message = document.getElementById('message').value.trim();
+            if (!message) return;
+            
+            const temperature = parseFloat(document.getElementById('temperature').value);
+            const responseDiv = document.getElementById('response');
+            const submitButton = document.getElementById('submitButton');
+            
+            // Disable submit button while processing
+            submitButton.disabled = true;
+            responseDiv.innerHTML = '<p class="status">Loading response...</p>';
+            
+            try {
+                const response = await fetch('/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ message, temperature })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`Server responded with status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                responseDiv.innerHTML = data.response;
+            } catch (error) {
+                responseDiv.innerHTML = `<p class="status">Error: ${error.message}</p>`;
+            } finally {
+                submitButton.disabled = false;
+            }
+        }
+
+        // Allow submitting with Enter key while in the textarea
+        document.getElementById('message').addEventListener('keydown', function(event) {
+            if (event.key === 'Enter' && event.ctrlKey) {
+                sendMessage();
+            }
+        });
+
+        async function loadAssistantConfig() {
+            try {
+                const response = await fetch('/storage-admin/config');
+                if (response.ok) {
+                    const config = await response.json();
+                    if (config.assistant_name) {
+                        // Update the chat title with assistant name
+                        document.querySelector('.chat-title').textContent = config.assistant_name;
+                        // Update the page title
+                        document.title = config.assistant_name + ' - Chat';
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading assistant configuration:', error);
+            }
+        }
+
+        // Call this on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            loadAssistantConfig();
+            // ... other initialization code
+        });
+    </script>
+</body>
+</html>
