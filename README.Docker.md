@@ -1,14 +1,16 @@
-# 7robots-chatbot
+# 7robots-chatbot Docker build instructions
  
  ## Overview
 
  This software can be used to serve an AI Chatbot interface to provide answers about your documents. It leverages OpenAI's new Agents framework to provide the GAI back-end. Similarly, it also leverages vector storage provided by the OpenAI to store your documents.
 
-NOTE: this README provides instructions on how to run this application in a python virtual environment. If you would prefer to run it in a Docker container, look at [README.Docker.md](https://github.com/7robots/7robots-chatbot/blob/main/README.Docker.md).
+This document provides basic instructions on how to run the AI assistant in a Docker container on your desktop. It does not contain more detailed documentation on cloud-based deployments.
+
+NOTE: this README provides instructions on how to run this application in a Docker Container. If you would prefer to run it in a python virtual environment (venv), look at [README.md](https://github.com/7robots/7robots-chatbot/blob/main/README.md).
 
  ## Prerequisites
 
- - an OpenAI API key and credits on the OpenAI platform for both API usage and storage.
+ - Docker or Docker Desktop
  - Python 3.11 or higher
  - Pip (to install software dependencies)
 
@@ -29,17 +31,13 @@ git clone https://github.com/7robots/7robots-chatbot.git
 cd 7robots-chatbot
 ```
 
-2. Setup virtual environment:
+2. Docker
 
+Ensure Docker or Docker Desktop is running
+
+
+3. Stage configuration file
 ```bash
-python -m venv venv
-source venv/bin/activate
-```
-
-
-3. Install required packages and stage configuration file
-```bash
-pip install -r requirements.txt
 cp config.yaml.example config.yaml
 ```
 
@@ -61,8 +59,10 @@ openai:
   vector_store_id: your_vector_store_id_here
 ```
 
-## Start the FastAPI server with uvicorn
-fastapi run agent.py
+## Build and run your container
+```bash
+docker compose up --build 
+```
 
 ## Admin Page
 Admin Panel: http://localhost:8000/admin
@@ -94,3 +94,5 @@ To deactivate the virtual environment when you're done working:
 deactivate
 
 For further assistance or to report issues, please open an issue on the GitHub repository.
+
+
