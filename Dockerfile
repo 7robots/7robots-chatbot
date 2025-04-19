@@ -33,11 +33,18 @@ RUN --mount=type=cache,target=/root/.cache/pip \
     --mount=type=bind,source=requirements.txt,target=requirements.txt \
     python -m pip install -r requirements.txt
 
-# Switch to the non-privileged user to run the application.
-USER appuser
-
 # Copy the source code into the container.
 COPY . .
+
+# Copy example config file if needed and ensure permissions are correct
+RUN if [ ! -f "config.yaml" ]; then \
+    cp config.yaml.example config.yaml; \
+    fi; \
+    chown appuser:appuser config.yaml; \
+    chmod 644 config.yaml
+
+# Switch to the non-privileged user to run the application.
+USER appuser
 
 # Expose the port that the application listens on.
 EXPOSE 8000
