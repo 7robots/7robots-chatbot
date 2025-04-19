@@ -618,7 +618,11 @@
                     <i class="fas fa-sync-alt"></i> Refresh Stores
                 </button>
                 
-                <div id="vectorStoreList" class="store-list"></div>
+                <div id="vectorStoreList" class="store-list">
+                    <div class="store-item" data-id="${storeId}" data-name="${storeName}">
+                        <!-- Store content -->
+                    </div>
+                </div>
                 
                 <h3><i class="fas fa-plus-circle"></i> Create New Store</h3>
                 <div class="form-group">
@@ -903,21 +907,6 @@
                                 ''}
                         `;
                         
-                        // Add click handler to select store and display its files
-                        storeEl.addEventListener('click', function() {
-                            // Update visual selection
-                            document.querySelectorAll('.store-item').forEach(el => {
-                                el.classList.remove('selected');
-                            });
-                            this.classList.add('selected');
-                            
-                            // Update the header and action buttons
-                            updateStoreHeader(store.id, store.name);
-                            
-                            // The key change: Display this store's files even if not active
-                            displayStoreFiles(store.id, store.name);
-                        });
-                        
                         listEl.appendChild(storeEl);
                     });
                 } else {
@@ -929,8 +918,19 @@
             }
         }
 
-        // New function to display a store's files without setting it as active
+        // Update the displayStoreFiles function to always update the header buttons
         async function displayStoreFiles(storeId, storeName) {
+            // First, remove 'selected' class from all store items
+            document.querySelectorAll('.store-item').forEach(item => {
+                item.classList.remove('selected');
+            });
+            
+            // Add 'selected' class to the clicked store item
+            const storeEl = document.querySelector(`.store-item[data-id="${storeId}"]`);
+            if (storeEl) {
+                storeEl.classList.add('selected');
+            }
+            
             const nameElement = document.getElementById('currentVectorStoreName');
             const noWarning = document.getElementById('noVectorStoreWarning');
             const fileContainer = document.getElementById('fileManagementContainer');
@@ -948,6 +948,9 @@
                 storeStatusEl.innerHTML = '';
             }
             
+            // Update the header buttons based on the selected store
+            updateStoreHeader(storeId, storeName);
+            
             // Load files for this store
             loadFiles(storeId);
 
@@ -955,7 +958,7 @@
             updateUploadCard();
         }
 
-        // New function to update the header controls
+        // Update the updateStoreHeader function to correctly check the selected store
         function updateStoreHeader(storeId, storeName) {
             const headerEl = document.getElementById('storeActionButtons');
             const isActive = storeId === activeVectorStoreId;
@@ -969,17 +972,32 @@
             // Show appropriate buttons based on whether this is the active store
             headerEl.innerHTML = `
                 ${isActive ? 
-                    `<button class="btn btn-success btn-sm" disabled>
+                    `<button class="btn btn-success btn-sm active-store-btn" disabled>
                         <i class="fas fa-check-circle"></i> Active Store
                     </button>` : 
-                    `<button onclick="setAsActiveVectorStore('${storeId}')" class="btn btn-primary btn-sm">
+                    `<button class="btn btn-primary btn-sm set-active-btn" data-store-id="${storeId}">
                         <i class="fas fa-check-circle"></i> Set as Active
                     </button>`
                 }
-                <button onclick="deleteVectorStore('${storeId}')" class="btn btn-danger btn-sm ml-1">
+                <button class="btn btn-danger btn-sm ml-1 delete-store-btn" data-store-id="${storeId}">
                     <i class="fas fa-trash"></i> Delete
                 </button>
             `;
+            
+            // Add event listeners to the newly created buttons
+            const setActiveBtn = headerEl.querySelector('.set-active-btn');
+            if (setActiveBtn) {
+                setActiveBtn.addEventListener('click', function() {
+                    setAsActiveVectorStore(this.dataset.storeId);
+                });
+            }
+            
+            const deleteBtn = headerEl.querySelector('.delete-store-btn');
+            if (deleteBtn) {
+                deleteBtn.addEventListener('click', function() {
+                    deleteVectorStore(this.dataset.storeId);
+                });
+            }
         }
         
         // Create new vector store - updated to remove description
@@ -1064,14 +1082,26 @@
                 // Update the global variable
                 activeVectorStoreId = storeId;
                 
-                // Update file management section
-                updateFileManagementSection();
-                
-                // Update the store action buttons
-                updateStoreHeader(storeId, storeName);
+                // Keep the currently selected store (don't reset selection)
+                const selectedStoreEl = document.querySelector('.store-item.selected');
+                const selectedStoreId = selectedStoreEl ? selectedStoreEl.dataset.id : null;
+                const selectedStoreName = selectedStoreEl ? selectedStoreEl.dataset.name || selectedStoreEl.dataset.id : null;
                 
                 // Refresh the vector stores to update the UI
-                loadVectorStores();
+                await loadVectorStores();
+                
+                // If we had a selected store, reselect it to maintain state
+                if (selectedStoreId) {
+                    // We need to wait for the vector stores to be reloaded
+                    setTimeout(() => {
+                        displayStoreFiles(selectedStoreId, selectedStoreName);
+                    }, 100);
+                } else {
+                    // If nothing was selected, show the newly active store
+                    setTimeout(() => {
+                        displayStoreFiles(storeId, storeName);
+                    }, 100);
+                }
             } catch (error) {
                 console.error('Error setting active vector store:', error);
                 showMessage('Failed to set active vector store: ' + error.message, true);
@@ -1458,6 +1488,23 @@
                 }
             }
         }
+
+        // Make sure this event is properly binding to dynamically created elements
+        document.getElementById('vectorStoreList').addEventListener('click', function(e) {
+            // Don't handle clicks on buttons inside the store item
+            if (e.target.closest('button')) {
+                return;
+            }
+            
+            const storeItem = e.target.closest('.store-item');
+            if (storeItem) {
+                const storeId = storeItem.dataset.id;
+                const storeName = storeItem.dataset.name || storeId;
+                
+                // Display files
+                displayStoreFiles(storeId, storeName);
+            }
+        });
         
         // Initialize - runs when page loads
         document.addEventListener('DOMContentLoaded', () => {

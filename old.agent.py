@@ -12,7 +12,6 @@ from pydantic import BaseModel
 from openai import OpenAI
 from agents import Agent, Runner, WebSearchTool, FileSearchTool
 from agents import set_default_openai_key
-from agents.extensions.handoff_prompt import prompt_with_handoff_instructions
 
 # ==========================================================
 # Configuration and Initialization
@@ -61,15 +60,15 @@ VECTOR_STORE_ID = config.get("openai", {}).get("vector_store_id")
 # Initialize the OpenAI client for API calls
 client = OpenAI(api_key=OPENAI_API_KEY)
 
-# Rename the existing function to create_rag_agent
-def create_rag_agent(vector_store_id):
+# Initialize the OpenAI agent
+def create_agent(vector_store_id):
     # Get assistant name from config
     config = load_config()
     assistant_name = config.get("assistant", {}).get("name", "AI Assistant")
     
     return Agent(
-        name=f"{assistant_name} Document Expert",
-        instructions="You are a knowledgeable assistant that only answers questions from the files contained in the file search tool. If the information isn't found in the documents, clearly state that you don't have that information.",
+        name=assistant_name,
+        instructions="You are a knowledgeable assistant that only answer questions from the files contained in the file search tool",
         tools=[
             FileSearchTool(
                 max_num_results=30,
@@ -78,19 +77,7 @@ def create_rag_agent(vector_store_id):
         ]
     )
 
-# Create the document agent instance
-doc_agent = create_rag_agent(VECTOR_STORE_ID)
-
-# Create the orchestrator agent directly (similar to orchestrator.py)
-orchestrator_agent = Agent(
-    name=load_config().get("assistant", {}).get("name", "AI Assistant"),
-    instructions=prompt_with_handoff_instructions("""
-You are a helpful virtual assistant who can answer questions based on the available documents.
-When a user asks about information that might be in the documents, route their question to the document expert.
-Be friendly and concise in your responses.
-    """),
-    handoffs=[doc_agent],
-)
+doc_agent = create_agent(VECTOR_STORE_ID)
 
 # Initialize FastAPI app
 app = FastAPI()
@@ -145,8 +132,7 @@ async def get_admin_page():
 
 @app.post("/chat")
 async def chat(request: ChatRequest):
-    # Use orchestrator_agent instead of doc_agent
-    result = await Runner.run(orchestrator_agent, input=request.message)
+    result = await Runner.run(doc_agent, input=request.message)
     return {"response": result.final_output}
 
 # ==========================================================
@@ -210,7 +196,6 @@ async def update_vector_store_id(request: VectorStoreIdRequest):
     try:
         global VECTOR_STORE_ID
         global doc_agent
-        global orchestrator_agent
         
         # Update the config file
         config_path = "config.yaml"
@@ -234,18 +219,7 @@ async def update_vector_store_id(request: VectorStoreIdRequest):
         VECTOR_STORE_ID = request.vector_store_id
         
         # Update the doc agent with the new vector store ID
-        doc_agent = create_rag_agent(VECTOR_STORE_ID)
-        
-        # Update the orchestrator agent with the new doc_agent
-        orchestrator_agent = Agent(
-            name=config.get("assistant", {}).get("name", "AI Assistant"),
-            instructions=prompt_with_handoff_instructions("""
-You are a helpful virtual assistant who can answer questions based on the available documents.
-When a user asks about information that might be in the documents, route their question to the document expert.
-Be friendly and concise in your responses.
-            """),
-            handoffs=[doc_agent],
-        )
+        doc_agent = create_agent(VECTOR_STORE_ID)
         
         return {"status": "success", "message": "Vector store ID updated successfully"}
     except Exception as e:
@@ -254,9 +228,6 @@ Be friendly and concise in your responses.
 @app.post("/storage-admin/config/assistant-name")
 async def update_assistant_name(request: AssistantNameRequest):
     try:
-        global orchestrator_agent
-        global doc_agent
-        
         # Update the config file
         config_path = "config.yaml"
         
@@ -274,20 +245,6 @@ async def update_assistant_name(request: AssistantNameRequest):
         # Save the updated config
         with open(config_path, "w") as file:
             yaml.dump(config, file)
-            
-        # Recreate the doc_agent with the new name
-        doc_agent = create_rag_agent(VECTOR_STORE_ID)
-        
-        # Update the orchestrator agent with the new name and doc_agent
-        orchestrator_agent = Agent(
-            name=request.assistant_name,
-            instructions=prompt_with_handoff_instructions("""
-You are a helpful virtual assistant who can answer questions based on the available documents.
-When a user asks about information that might be in the documents, route their question to the document expert.
-Be friendly and concise in your responses.
-            """),
-            handoffs=[doc_agent],
-        )
         
         return {"status": "success", "message": "Assistant name updated successfully"}
     except Exception as e:
