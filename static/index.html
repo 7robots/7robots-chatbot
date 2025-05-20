@@ -8,23 +8,53 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            --primary-color: #4361ee;
-            --primary-light: #4895ef;
-            --primary-dark: #3f37c9;
-            --secondary-color: #00b4d8;
-            --success-color: #4ade80;
-            --danger-color: #f43f5e;
-            --text-color: #1e293b;
+            /* Modern color palette */
+            --primary: #6366f1;
+            --primary-light: #818cf8;
+            --primary-dark: #4f46e5;
+            --secondary: #10b981;
+            --accent: #f59e0b;
+            --danger: #ef4444;
+            --text: #1e293b;
             --text-light: #64748b;
-            --bg-color: #f8fafc;
-            --card-color: #ffffff;
-            --border-color: #e2e8f0;
-            --border-radius: 8px;
+            --text-lighter: #94a3b8;
+            --surface: #f8fafc;
+            --surface-card: #ffffff;
+            --border: #e2e8f0;
+            
+            /* UI Properties */
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
             --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-            --transition: all 0.2s ease;
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --radius-sm: 0.375rem;
+            --radius: 0.5rem;
+            --radius-lg: 0.75rem;
+            --transition: 200ms cubic-bezier(0.4, 0, 0.2, 1);
+
+            /* Layout */
             --container-width: 900px;
+            --header-height: 64px;
         }
 
+        /* Dark mode */
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --primary: #818cf8;
+                --primary-light: #a5b4fc;
+                --primary-dark: #6366f1;
+                --secondary: #34d399;
+                --accent: #fbbf24;
+                --danger: #f87171;
+                --text: #f1f5f9;
+                --text-light: #cbd5e1;
+                --text-lighter: #94a3b8;
+                --surface: #0f172a;
+                --surface-card: #1e293b;
+                --border: #334155;
+            }
+        }
+
+        /* Base styles */
         * {
             margin: 0;
             padding: 0;
@@ -32,9 +62,9 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-            color: var(--text-color);
-            background-color: var(--bg-color);
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            color: var(--text);
+            background-color: var(--surface);
             line-height: 1.6;
             min-height: 100vh;
             display: flex;
@@ -53,13 +83,6 @@
             border-width: 0;
         }
 
-        header {
-            background-color: var(--card-color);
-            box-shadow: var(--shadow);
-            padding: 1rem 0;
-            margin-bottom: 2rem;
-        }
-
         .container {
             max-width: var(--container-width);
             margin: 0 auto;
@@ -67,177 +90,308 @@
             width: 100%;
         }
 
+        /* Header */
+        .header {
+            background-color: var(--surface-card);
+            box-shadow: var(--shadow-sm);
+            height: var(--header-height);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
         .header-content {
             display: flex;
-            justify-content: center; /* Changed from space-between to center */
+            justify-content: center;
             align-items: center;
+            height: 100%;
+        }
+
+        .app-logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .app-logo-icon {
+            font-size: 1.5rem;
+            color: var(--primary);
         }
 
         .chat-title {
-            font-size: 1.75rem;
-            font-weight: 600;
-            color: var(--primary-dark);
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            letter-spacing: -0.02em;
         }
 
-        .admin-link {
-            display: inline-flex;
-            align-items: center;
-            padding: 0.5rem 1rem;
-            background-color: var(--secondary-color);
-            color: white;
-            text-decoration: none;
-            border-radius: var(--border-radius);
-            font-size: 0.9rem;
-            font-weight: 500;
-            transition: var(--transition);
-        }
-
-        .admin-link:hover {
-            background-color: #0096c7;
-        }
-
-        .admin-link i {
-            margin-right: 0.5rem;
-        }
-
-        main {
+        /* Main content */
+        .main {
             flex: 1;
-            margin-bottom: 2rem;
+            padding: 2rem 0;
         }
 
-        .chat-container {
-            background-color: var(--card-color);
-            border-radius: var(--border-radius);
+        .chat-interface {
+            display: grid;
+            grid-template-rows: auto 1fr;
+            gap: 2rem;
+            max-width: var(--container-width);
+            margin: 0 auto;
+        }
+
+        /* Response area */
+        .response-section {
+            border-radius: var(--radius-lg);
+            background-color: var(--surface-card);
             box-shadow: var(--shadow);
             overflow: hidden;
+            transition: var(--transition);
+            height: min(60vh, 500px);
             display: flex;
             flex-direction: column;
-        }
-
-        .form-group {
-            margin-bottom: 1rem;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 500;
-            color: var(--text-color);
-        }
-
-        textarea {
-            width: 100%;
-            min-height: 120px;
-            padding: 1rem;
-            border: 1px solid var(--border-color);
-            border-radius: var(--border-radius);
-            font-size: 1rem;
-            font-family: inherit;
-            resize: vertical;
-            transition: var(--transition);
-        }
-
-        textarea:focus {
-            border-color: var(--primary-light);
-            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
-            outline: none;
-        }
-
-        .controls {
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            gap: 1rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .temperature-control {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        input[type="number"] {
-            width: 70px;
-            padding: 0.5rem;
-            border: 1px solid var(--border-color);
-            border-radius: var(--border-radius);
-            font-size: 1rem;
-            transition: var(--transition);
-        }
-
-        input[type="number"]:focus {
-            border-color: var(--primary-light);
-            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
-            outline: none;
-        }
-
-        button {
-            padding: 0.75rem 1.5rem;
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            border-radius: var(--border-radius);
-            font-size: 1rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: var(--transition);
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        button:hover {
-            background-color: var(--primary-dark);
-        }
-
-        button:focus {
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.4);
-        }
-
-        button:disabled {
-            background-color: var(--text-light);
-            cursor: not-allowed;
-        }
-
-        button i {
-            margin-right: 0.5rem;
-        }
-
-        .temperature-help {
-            font-size: 0.85rem;
-            color: var(--text-light);
-            cursor: help;
-            margin-left: 0.25rem;
-        }
-
-        .response-section {
-            margin-top: 2rem;
         }
 
         .response-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 0.5rem;
+            padding: 1rem 1.5rem;
+            background-color: rgba(var(--primary-rgb, 99, 102, 241), 0.05);
+            border-bottom: 1px solid var(--border);
         }
 
         .response-title {
-            font-size: 1.25rem;
+            font-size: 1rem;
             font-weight: 600;
-            color: var(--text-color);
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .response-content {
+            flex: 1;
+            padding: 1.5rem;
+            overflow-y: auto;
+            line-height: 1.7;
         }
 
         #response {
-            background-color: var(--card-color);
-            border: 1px solid var(--border-color);
-            border-radius: var(--border-radius);
-            padding: 1.5rem;
-            min-height: 200px;
-            box-shadow: var(--shadow);
+            max-width: 100%;
             overflow-wrap: break-word;
-            line-height: 1.7;
+        }
+
+        #response:empty::before {
+            content: "Ask me anything...";
+            color: var(--text-lighter);
+            font-style: italic;
+        }
+
+        /* Chat input area */
+        .chat-input-container {
+            position: relative;
+            border-radius: var(--radius-lg);
+            background-color: var(--surface-card);
+            box-shadow: var(--shadow);
+            padding: 1.5rem;
+            transition: var(--transition);
+        }
+
+        .chat-input-container:focus-within {
+            box-shadow: var(--shadow-lg);
+        }
+
+        .chat-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .textarea-container {
+            position: relative;
+        }
+
+        .message-textarea {
+            width: 100%;
+            min-height: 120px;
+            padding: 1rem;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            font-size: 1rem;
+            font-family: inherit;
+            background-color: var(--surface-card);
+            color: var(--text);
+            resize: vertical;
+            transition: var(--transition);
+        }
+
+        .message-textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(var(--primary-rgb, 99, 102, 241), 0.2);
+        }
+
+        .shortcut-hint {
+            position: absolute;
+            bottom: 0.75rem;
+            right: 0.75rem;
+            font-size: 0.75rem;
+            color: var(--text-lighter);
+            background-color: var(--surface-card);
+            padding: 0.25rem 0.5rem;
+            border-radius: var(--radius-sm);
+            opacity: 0.8;
+            pointer-events: none;
+        }
+
+        .kbd {
+            background-color: var(--surface);
+            border-radius: 3px;
+            border: 1px solid var(--border);
+            box-shadow: 0 1px 0 rgba(0,0,0,0.1);
+            color: var(--text-light);
+            display: inline-block;
+            font-size: 0.7rem;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            line-height: 1;
+            padding: 2px 4px;
+            margin: 0 2px;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .temperature-control {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .temperature-label {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            font-weight: 500;
+            font-size: 0.9rem;
+            color: var(--text-light);
+        }
+
+        .temperature-input {
+            width: 80px;
+            padding: 0.5rem;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            font-size: 0.9rem;
+            color: var(--text);
+            background-color: var(--surface-card);
+            transition: var(--transition);
+        }
+
+        .temperature-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(var(--primary-rgb, 99, 102, 241), 0.2);
+        }
+
+        .temperature-tooltip {
+            position: relative;
+            display: inline-block;
+        }
+
+        .tooltip-icon {
+            color: var(--text-lighter);
+            font-size: 0.9rem;
+            cursor: help;
+        }
+
+        .tooltip-text {
+            visibility: hidden;
+            width: 250px;
+            background-color: var(--surface-card);
+            color: var(--text);
+            text-align: center;
+            border-radius: var(--radius);
+            padding: 0.75rem;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-style: normal;
+            font-size: 0.8rem;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            pointer-events: none;
+        }
+
+        .tooltip-text::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: var(--border) transparent transparent transparent;
+        }
+
+        .temperature-tooltip:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .send-button {
+            padding: 0.75rem 1.5rem;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: var(--radius);
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .send-button:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .send-button:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(var(--primary-rgb, 99, 102, 241), 0.4);
+        }
+
+        .send-button:disabled {
+            background-color: var(--text-lighter);
+            cursor: not-allowed;
+        }
+
+        /* Loading states */
+        .loading-spinner {
+            display: inline-block;
+            width: 1rem;
+            height: 1rem;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
 
         .status {
@@ -248,102 +402,50 @@
             gap: 0.5rem;
         }
 
-        .loading-spinner {
-            display: inline-block;
-            width: 1rem;
-            height: 1rem;
-            border: 2px solid rgba(67, 97, 238, 0.3);
-            border-radius: 50%;
-            border-top-color: var(--primary-color);
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        .temperature-tooltip {
-            position: relative;
-            display: inline-block;
-        }
-
-        .temperature-tooltip .tooltip-text {
-            visibility: hidden;
-            width: 250px;
-            background-color: var(--text-color);
-            color: var(--card-color);
-            text-align: center;
-            border-radius: var(--border-radius);
-            padding: 0.5rem;
-            position: absolute;
-            z-index: 1;
-            bottom: 125%;
-            left: 50%;
-            transform: translateX(-50%);
-            opacity: 0;
-            transition: opacity 0.3s;
-            font-style: normal;
-            font-size: 0.85rem;
-            pointer-events: none;
-        }
-
-        .temperature-tooltip .tooltip-text::after {
-            content: "";
-            position: absolute;
-            top: 100%;
-            left: 50%;
-            margin-left: -5px;
-            border-width: 5px;
-            border-style: solid;
-            border-color: var(--text-color) transparent transparent transparent;
-        }
-
-        .temperature-tooltip:hover .tooltip-text {
-            visibility: visible;
-            opacity: 1;
-        }
-
-        .shortcut-hint {
-            font-size: 0.85rem;
-            color: var(--text-light);
-            text-align: right;
-            margin-top: 0.25rem;
-        }
-
-        .kbd {
-            background-color: var(--border-color);
-            border-radius: 3px;
-            border: 1px solid var(--text-light);
-            box-shadow: 0 1px 0 rgba(0,0,0,0.2);
-            color: var(--text-color);
-            display: inline-block;
-            font-size: 0.8rem;
-            font-family: monospace;
-            line-height: 1;
-            padding: 2px 5px;
-            margin: 0 2px;
-        }
-
-        footer {
+        /* Footer */
+        .footer {
             margin-top: auto;
-            padding: 1rem 0;
+            padding: 1.5rem 0;
             text-align: center;
             color: var(--text-light);
             font-size: 0.9rem;
+        }
+
+        .footer-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .footer-text {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .heart-icon {
+            color: var(--danger);
+            animation: heartbeat 1.5s ease infinite;
+        }
+
+        @keyframes heartbeat {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
         }
 
         /* Responsive styles */
         @media (max-width: 768px) {
             .controls {
                 flex-direction: column;
-                align-items: flex-start;
+                align-items: stretch;
             }
             
             .temperature-control {
-                margin-bottom: 1rem;
+                margin-bottom: 0.5rem;
             }
             
-            button {
+            .send-button {
                 width: 100%;
             }
         }
@@ -354,66 +456,96 @@
                 transition: none !important;
             }
         }
+
+        /* Light/dark mode toggle */
+        :root {
+            --primary-rgb: 99, 102, 241;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --primary-rgb: 129, 140, 248;
+            }
+        }
     </style>
 </head>
 <body>
-    <header>
+    <header class="header">
         <div class="container header-content">
-            <h1 class="chat-title">AI Assistant</h1>
-            <!-- Admin panel link removed -->
+            <div class="app-logo">
+                <i class="fas fa-robot app-logo-icon" aria-hidden="true"></i>
+                <h1 class="chat-title">AI Assistant</h1>
+            </div>
         </div>
     </header>
 
-    <main class="container">
-        <section class="chat-container">
-            <form id="chatForm" aria-label="Chat form">
-                <div class="form-group">
-                    <label for="message">Your question:</label>
-                    <textarea 
-                        id="message" 
-                        name="message" 
-                        placeholder="Type your question here..." 
-                        aria-required="true"
-                        required
-                    ></textarea>
-                    <div class="shortcut-hint">Send with <span class="kbd">Ctrl</span> + <span class="kbd">Enter</span></div>
-                </div>
-                <div class="controls">
-                    <div class="temperature-control">
-                        <label for="temperature">Temperature:</label>
-                        <input 
-                            type="number" 
-                            id="temperature" 
-                            name="temperature"
-                            value="1.0" 
-                            min="0" 
-                            max="2" 
-                            step="0.1"
-                            aria-describedby="temp-desc"
-                        >
-                        <div class="temperature-tooltip">
-                            <i class="fas fa-question-circle temperature-help" aria-hidden="true"></i>
-                            <span class="tooltip-text" id="temp-desc">Controls randomness: lower (0) is more focused and deterministic, higher (2) is more creative and varied.</span>
+    <main class="main">
+        <div class="container chat-interface">
+            <section class="chat-input-container">
+                <form id="chatForm" class="chat-form" aria-label="Chat form">
+                    <div class="textarea-container">
+                        <textarea 
+                            id="message" 
+                            class="message-textarea"
+                            name="message" 
+                            placeholder="Ask me anything..." 
+                            aria-required="true"
+                            required
+                        ></textarea>
+                        <div class="shortcut-hint">
+                            <span class="kbd">Ctrl</span> + <span class="kbd">Enter</span> to send
                         </div>
                     </div>
-                    <button type="submit" id="submitButton">
-                        <i class="fas fa-paper-plane" aria-hidden="true"></i> Send Question
-                    </button>
-                </div>
-            </form>
-        </section>
+                    <div class="controls">
+                        <div class="temperature-control">
+                            <label class="temperature-label" for="temperature">
+                                Temperature:
+                                <div class="temperature-tooltip">
+                                    <i class="fas fa-circle-info tooltip-icon" aria-hidden="true"></i>
+                                    <span class="tooltip-text" id="temp-desc">Controls randomness: lower (0) is more focused and deterministic, higher (2) is more creative and varied.</span>
+                                </div>
+                            </label>
+                            <input 
+                                type="number" 
+                                id="temperature" 
+                                class="temperature-input"
+                                name="temperature"
+                                value="1.0" 
+                                min="0" 
+                                max="2" 
+                                step="0.1"
+                                aria-describedby="temp-desc"
+                            >
+                        </div>
+                        <button type="submit" id="submitButton" class="send-button">
+                            <i class="fas fa-paper-plane" aria-hidden="true"></i>
+                            <span>Send Question</span>
+                        </button>
+                    </div>
+                </form>
+            </section>
 
-        <section class="response-section" aria-live="polite">
-            <div class="response-header">
-                <h2 class="response-title">Response</h2>
-            </div>
-            <div id="response" aria-atomic="true"></div>
-        </section>
+            <section class="response-section" aria-live="polite">
+                <div class="response-header">
+                    <h2 class="response-title">
+                        <i class="fas fa-comment-dots" aria-hidden="true"></i>
+                        <span>Response</span>
+                    </h2>
+                </div>
+                <div class="response-content">
+                    <div id="response" aria-atomic="true"></div>
+                </div>
+            </section>
+        </div>
     </main>
 
-    <footer>
-        <div class="container">
-            <p>Made with love by 7robots</p>
+    <footer class="footer">
+        <div class="container footer-content">
+            <div class="footer-text">
+                <span>Made with </span>
+                <i class="fas fa-heart heart-icon" aria-hidden="true"></i>
+                <span>by 7robots</span>
+            </div>
         </div>
     </footer>
 
@@ -448,7 +580,7 @@
             
             // Disable submit button while processing
             submitButton.disabled = true;
-            submitButton.innerHTML = '<i class="fas fa-spinner fa-spin" aria-hidden="true"></i> Processing...';
+            submitButton.innerHTML = '<span class="loading-spinner" aria-hidden="true"></span><span>Processing...</span>';
             responseDiv.innerHTML = '<p class="status"><span class="loading-spinner" aria-hidden="true"></span> Generating response...</p>';
             
             try {
@@ -467,13 +599,14 @@
                 const data = await response.json();
                 responseDiv.innerHTML = data.response;
                 
-                // Scroll to response
-                responseDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                // Scroll to bottom of response
+                const responseContent = document.querySelector('.response-content');
+                responseContent.scrollTop = responseContent.scrollHeight;
             } catch (error) {
                 responseDiv.innerHTML = `<p class="status" role="alert"><i class="fas fa-exclamation-circle" aria-hidden="true"></i> Error: ${error.message}</p>`;
             } finally {
                 submitButton.disabled = false;
-                submitButton.innerHTML = '<i class="fas fa-paper-plane" aria-hidden="true"></i> Send Question';
+                submitButton.innerHTML = '<i class="fas fa-paper-plane" aria-hidden="true"></i><span>Send Question</span>';
             }
         }
 
